@@ -1,6 +1,5 @@
 package usr.afast.image.math;
 
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import usr.afast.image.enums.BorderHandling;
 import usr.afast.image.wrapped.WrappedImage;

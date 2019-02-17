@@ -1,10 +1,7 @@
 package usr.afast.image.algo;
 
 import org.jetbrains.annotations.NotNull;
-import usr.afast.image.enums.AlgorithmType;
 import usr.afast.image.enums.BorderHandling;
-import usr.afast.image.math.ConvolutionMatrixFactory;
-import usr.afast.image.math.ImageMatrixProcessor;
 import usr.afast.image.util.Stopwatch;
 import usr.afast.image.wrapped.WrappedImage;
 

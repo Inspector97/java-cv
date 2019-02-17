@@ -2,7 +2,6 @@ package usr.afast.image.util;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import usr.afast.image.enums.AlgorithmType;
 
 import java.awt.image.BufferedImage;
 import java.io.File;

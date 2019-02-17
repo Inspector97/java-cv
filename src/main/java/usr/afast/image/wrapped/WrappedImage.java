@@ -89,7 +89,7 @@ public class WrappedImage {
         return value * value;
     }
 
-    public void normalize() {
+    private void normalize() {
         double maxIntensity = 0, minIntensity = 1;
         double resultMaxIntensity = 1, resultMinIntensity = 0;
         for (double value : buffer) {

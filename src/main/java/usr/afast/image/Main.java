@@ -5,7 +5,6 @@ import usr.afast.image.algo.Pruitt;
 import usr.afast.image.algo.Scharr;
 import usr.afast.image.algo.Sobel;
 import usr.afast.image.enums.AlgorithmType;
-import usr.afast.image.enums.BorderHandling;
 
 import java.io.File;
 
