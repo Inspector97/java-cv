@@ -32,6 +32,11 @@ public class Main {
             case Scharr:
                 new Scharr().process(path, restArgs);
                 break;
+            case Lab1:
+                new Sobel().process(path, restArgs);
+                new Pruitt().process(path, restArgs);
+                new Scharr().process(path, restArgs);
+                break;
             default:
                 System.out.println("Not implemented yet");
         }
