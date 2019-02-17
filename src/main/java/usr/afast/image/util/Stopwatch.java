@@ -3,7 +3,6 @@ package usr.afast.image.util;
 import org.jetbrains.annotations.NotNull;
 import usr.afast.image.wrapped.WrappedImage;
 
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class Stopwatch {

@@ -105,7 +105,7 @@ public class WrappedImage {
     @Contract(pure = true)
     private int getPosition(int x, int y) {
         if (x < 0 || x >= width || y < 0 || y >= height)
-            throw new IllegalArgumentException("Pixel position out of borders");
+            throw new IllegalArgumentException(String.format("Pixel position out of borders (%d, %d)", x, y));
         return x * height + y;
     }
 }

@@ -6,8 +6,10 @@ import org.jetbrains.annotations.NotNull;
 
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Getter
 public class Matrix {
-    private int size;
+    private int width;
+    private int height;
     private double[][] matrix;
 
     @NotNull
@@ -18,18 +20,18 @@ public class Matrix {
         for (double[] row : matrix) {
             if (row.length != size) throw new IllegalArgumentException("Матрица не квадратна");
         }
-        return new Matrix(size, matrix);
+        return new Matrix(size, size, matrix);
     }
 
     @NotNull
     @Contract(" -> new")
     public Matrix reverse() {
-        double[][] reversedMatrix = new double[size][size];
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
+        double[][] reversedMatrix = new double[height][width];
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
                 reversedMatrix[i][j] = matrix[j][i];
             }
         }
-        return new Matrix(size, reversedMatrix);
+        return new Matrix(width, height, reversedMatrix);
     }
 }

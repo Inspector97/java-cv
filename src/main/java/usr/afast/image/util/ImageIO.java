@@ -35,17 +35,17 @@ public class ImageIO {
     }
 
     @NotNull
-    public static String getSaveFilePath(String path, @NotNull AlgorithmType algorithmType) {
+    public static String getSaveFilePath(String path, String suffix) {
         File file = new File(path);
         String directory = file.getParentFile().getAbsolutePath();
         String fileName = cropExtension(file.getName());
-        return directory + File.separator + appendFileName(fileName, algorithmType) + FILE_EXTENSION;
+        return directory + File.separator + appendFileName(fileName, suffix) + FILE_EXTENSION;
     }
 
     @NotNull
     @Contract(pure = true)
-    private static String appendFileName(String fileName, @NotNull AlgorithmType algorithmType) {
-        return fileName + "_" + algorithmType.name();
+    private static String appendFileName(String fileName, String suffix) {
+        return fileName + "_" + suffix;
     }
 
     private static String cropExtension(@NotNull String fileName) {

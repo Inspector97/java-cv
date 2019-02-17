@@ -5,14 +5,14 @@ import usr.afast.image.math.ConvolutionMatrixFactory;
 import usr.afast.image.math.ImageMatrixProcessor;
 import usr.afast.image.wrapped.WrappedImage;
 
-public class Sobel extends SingleResultProcessor {
+public class Scharr extends SingleResultProcessor {
     @Override
     public WrappedImage apply(WrappedImage wrappedImage, BorderHandling borderHandling) {
         WrappedImage xImage = ImageMatrixProcessor.processWithConvolution(wrappedImage,
-                                                                          ConvolutionMatrixFactory.getSobelXMatrix(),
+                                                                          ConvolutionMatrixFactory.getScharrXMatrix(),
                                                                           borderHandling);
         WrappedImage yImage = ImageMatrixProcessor.processWithConvolution(wrappedImage,
-                                                                          ConvolutionMatrixFactory.getSobelYMatrix(),
+                                                                          ConvolutionMatrixFactory.getScharrYMatrix(),
                                                                           borderHandling);
 
         return WrappedImage.getGradient(xImage, yImage);

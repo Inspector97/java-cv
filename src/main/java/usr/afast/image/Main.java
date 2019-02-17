@@ -1,6 +1,8 @@
 package usr.afast.image;
 
 import org.jetbrains.annotations.NotNull;
+import usr.afast.image.algo.Pruitt;
+import usr.afast.image.algo.Scharr;
 import usr.afast.image.algo.Sobel;
 import usr.afast.image.enums.AlgorithmType;
 import usr.afast.image.enums.BorderHandling;
@@ -23,11 +25,16 @@ public class Main {
 
         switch (type) {
             case Sobel:
-                Sobel.process(path, restArgs);
+                new Sobel().process(path, restArgs);
+                break;
+            case Pruitt:
+                new Pruitt().process(path, restArgs);
+                break;
+            case Scharr:
+                new Scharr().process(path, restArgs);
                 break;
             default:
                 System.out.println("Not implemented yet");
-                return;
         }
     }
 
