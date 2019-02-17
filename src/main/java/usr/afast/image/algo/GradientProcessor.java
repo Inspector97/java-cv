@@ -7,14 +7,14 @@ import usr.afast.image.wrapped.WrappedImage;
 
 import java.awt.image.BufferedImage;
 
+import static usr.afast.image.util.StringArgsUtil.getBorderHandling;
 import static usr.afast.image.util.ImageIO.*;
 
-public abstract class GradientProcessor {
+public abstract class GradientProcessor implements Algorithm {
+    @Override
     public final void process(String path, @NotNull String... args) {
-        final BorderHandling borderHandling = args.length > 0 ? BorderHandling.of(args[0]) : BorderHandling.Copy;
-        System.out.println("Using " + borderHandling.name() + " as border handling");
+        final BorderHandling borderHandling = getBorderHandling(0, args);
         BufferedImage image = read(path);
-        if (image == null) return;
         WrappedImage wrappedImage = WrappedImage.of(image);
         WrappedImage result = Stopwatch.measure(() -> calcGradient(path, wrappedImage, borderHandling));
         BufferedImage bufferedImageResult = WrappedImage.save(result);

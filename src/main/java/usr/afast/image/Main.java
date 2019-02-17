@@ -1,6 +1,7 @@
 package usr.afast.image;
 
 import org.jetbrains.annotations.NotNull;
+import usr.afast.image.algo.Gauss;
 import usr.afast.image.algo.Pruitt;
 import usr.afast.image.algo.Scharr;
 import usr.afast.image.algo.Sobel;
@@ -36,6 +37,9 @@ public class Main {
                 new Sobel().process(path, restArgs);
                 new Pruitt().process(path, restArgs);
                 new Scharr().process(path, restArgs);
+                break;
+            case Gauss:
+                new Gauss().process(path, restArgs);
                 break;
             default:
                 System.out.println("Not implemented yet");
