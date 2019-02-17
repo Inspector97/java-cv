@@ -6,7 +6,6 @@ import usr.afast.image.util.Stopwatch;
 import usr.afast.image.wrapped.WrappedImage;
 
 import java.awt.image.BufferedImage;
-import java.nio.file.Watchable;
 
 import static usr.afast.image.util.ImageIO.*;
 
