@@ -5,16 +5,18 @@ import usr.afast.image.math.ConvolutionMatrixFactory;
 import usr.afast.image.math.ImageMatrixProcessor;
 import usr.afast.image.wrapped.WrappedImage;
 
-public class Pruitt extends SingleResultProcessor {
+public class Pruitt extends GradientProcessor {
     @Override
-    public WrappedImage apply(WrappedImage wrappedImage, BorderHandling borderHandling) {
-        WrappedImage xImage = ImageMatrixProcessor.processWithConvolution(wrappedImage,
-                                                                          ConvolutionMatrixFactory.getPruittXMatrix(),
-                                                                          borderHandling);
-        WrappedImage yImage = ImageMatrixProcessor.processWithConvolution(wrappedImage,
-                                                                          ConvolutionMatrixFactory.getPruittYMatrix(),
-                                                                          borderHandling);
+    public WrappedImage getXImage(WrappedImage wrappedImage, BorderHandling borderHandling) {
+        return ImageMatrixProcessor.processWithConvolution(wrappedImage,
+                                                           ConvolutionMatrixFactory.getPruittXMatrix(),
+                                                           borderHandling);
+    }
 
-        return WrappedImage.getGradient(xImage, yImage);
+    @Override
+    public WrappedImage getYImage(WrappedImage wrappedImage, BorderHandling borderHandling) {
+        return ImageMatrixProcessor.processWithConvolution(wrappedImage,
+                                                           ConvolutionMatrixFactory.getPruittYMatrix(),
+                                                           borderHandling);
     }
 }

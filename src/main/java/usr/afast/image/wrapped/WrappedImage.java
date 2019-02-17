@@ -37,6 +37,13 @@ public class WrappedImage {
         return wrappedImage;
     }
 
+    private WrappedImage(@NotNull WrappedImage wrappedImage) {
+        width = wrappedImage.width;
+        height = wrappedImage.height;
+        buffer = new double[width * height];
+        System.arraycopy(wrappedImage.buffer, 0, buffer, 0, buffer.length);
+    }
+
     public WrappedImage(int width, int height) {
         if (width < 0 || height < 0)
             throw new IllegalArgumentException("Размер не может быть отрицательным");
@@ -45,12 +52,13 @@ public class WrappedImage {
         this.buffer = new double[width * height];
     }
 
-    public BufferedImage save() {
-        normalize();
-        BufferedImage image = new BufferedImage(width, height, TYPE_BYTE_GRAY);
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                int gray = (int) Math.round(getPixel(x, y) * 255);
+    public static BufferedImage save(WrappedImage wrappedImage) {
+        WrappedImage copied = new WrappedImage(wrappedImage);
+        copied.normalize();
+        BufferedImage image = new BufferedImage(copied.width, copied.height, TYPE_BYTE_GRAY);
+        for (int x = 0; x < copied.width; x++) {
+            for (int y = 0; y < copied.height; y++) {
+                int gray = (int) Math.round(copied.getPixel(x, y) * 255);
                 Color color = new Color(gray, gray, gray);
                 image.setRGB(x, y, color.getRGB());
             }

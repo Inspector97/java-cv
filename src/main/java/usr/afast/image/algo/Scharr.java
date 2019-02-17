@@ -5,16 +5,18 @@ import usr.afast.image.math.ConvolutionMatrixFactory;
 import usr.afast.image.math.ImageMatrixProcessor;
 import usr.afast.image.wrapped.WrappedImage;
 
-public class Scharr extends SingleResultProcessor {
+public class Scharr extends GradientProcessor {
     @Override
-    public WrappedImage apply(WrappedImage wrappedImage, BorderHandling borderHandling) {
-        WrappedImage xImage = ImageMatrixProcessor.processWithConvolution(wrappedImage,
-                                                                          ConvolutionMatrixFactory.getScharrXMatrix(),
-                                                                          borderHandling);
-        WrappedImage yImage = ImageMatrixProcessor.processWithConvolution(wrappedImage,
-                                                                          ConvolutionMatrixFactory.getScharrYMatrix(),
-                                                                          borderHandling);
+    public WrappedImage getXImage(WrappedImage wrappedImage, BorderHandling borderHandling) {
+        return ImageMatrixProcessor.processWithConvolution(wrappedImage,
+                                                           ConvolutionMatrixFactory.getScharrXMatrix(),
+                                                           borderHandling);
+    }
 
-        return WrappedImage.getGradient(xImage, yImage);
+    @Override
+    public WrappedImage getYImage(WrappedImage wrappedImage, BorderHandling borderHandling) {
+        return ImageMatrixProcessor.processWithConvolution(wrappedImage,
+                                                           ConvolutionMatrixFactory.getScharrYMatrix(),
+                                                           borderHandling);
     }
 }
