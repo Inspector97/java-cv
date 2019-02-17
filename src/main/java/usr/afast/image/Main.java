@@ -1,22 +1,13 @@
 package usr.afast.image;
 
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import usr.afast.image.api.ImageProcessor;
-import usr.afast.image.api.util.StringParseUtil;
-import usr.afast.image.config.ProcessorsConfiguration;
+import usr.afast.image.algo.Sobel;
 import usr.afast.image.enums.AlgorithmType;
-import usr.afast.image.wrapped.WrappedImage;
+import usr.afast.image.enums.BorderHandling;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.File;
 
 public class Main {
-    private static final String FILE_EXTENSION = ".png";
-    private static final String FILE_FORMAT = "png";
-
     public static void main(@NotNull String[] args) {
         if (args.length < 2) {
             System.out.println("Invalid args");
@@ -26,27 +17,18 @@ public class Main {
             System.out.println("Invalid path");
             return;
         }
-        AlgorithmType type = getAlgorithmType(args[1]);
-        if (type == null) {
-            System.out.println("Invalid algorithm code");
-            return;
-        }
+        AlgorithmType type = AlgorithmType.valueOf(args[1]);
         String path = args[0];
+        String[] restArgs = restArgs(2, args);
 
-        BufferedImage image = read(path);
-        ImageProcessor imageProcessor = ProcessorsConfiguration.getImageProcessor(type);
-
-        WrappedImage wrappedImage = WrappedImage.of(image);
-        System.out.println("Processing");
-        long startTime = System.currentTimeMillis();
-        WrappedImage result = imageProcessor.process(wrappedImage, type);
-        double timeSeconds = (System.currentTimeMillis() - startTime) / 1000D;
-        System.out.println(String.format("Processed in %.3f s.", timeSeconds));
-        BufferedImage bufferedImageResult = result.save();
-
-        String newFilePath = getSaveFilePath(path, type);
-        System.out.println("Saving to " + newFilePath);
-        write(newFilePath, bufferedImageResult);
+        switch (type) {
+            case Sobel:
+                Sobel.process(path, restArgs);
+                break;
+            default:
+                System.out.println("Not implemented yet");
+                return;
+        }
     }
 
     private static boolean checkPath(String path) {
@@ -54,59 +36,12 @@ public class Main {
         return file.canRead() && !file.isDirectory();
     }
 
-    @Nullable
-    private static AlgorithmType getAlgorithmType(String arg) {
-        arg = arg.toLowerCase();
-        for (AlgorithmType algorithmType : AlgorithmType.values()) {
-            if (algorithmType.getCode().equals(arg)) {
-                return algorithmType;
-            }
-        }
-        return null;
+    @SuppressWarnings("SameParameterValue")
+    private static String[] restArgs(int skip, @NotNull String... args) {
+        if (args.length <= skip)
+            return new String[0];
+        String[] restArgs = new String[args.length - skip];
+        System.arraycopy(args, skip, restArgs, 0, args.length - skip);
+        return restArgs;
     }
-
-    private static BufferedImage read(String path) {
-        BufferedImage image = null;
-        try {
-            image = ImageIO.read(new File(path));
-        } catch (Exception e) {
-            System.out.println("Unable to read image from file, see the exception below");
-            e.printStackTrace();
-        }
-        return image;
-    }
-
-    private static boolean write(String path, BufferedImage image) {
-        try {
-            ImageIO.write(image, FILE_FORMAT, new File(path));
-            return true;
-        } catch (Exception e) {
-            System.out.println("Unable to write image to file, see the exception below");
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    @NotNull
-    private static String getSaveFilePath(String path, @NotNull AlgorithmType algorithmType) {
-        File file = new File(path);
-        String directory = file.getParentFile().getAbsolutePath();
-        String fileName = cropExtension(file.getName());
-        return directory + File.separator + appendFileName(fileName, algorithmType) + FILE_EXTENSION;
-    }
-
-    @NotNull
-    @Contract(pure = true)
-    private static String appendFileName(String fileName, @NotNull AlgorithmType algorithmType) {
-        return fileName + "_" + algorithmType.name();
-    }
-
-    private static String cropExtension(@NotNull String fileName) {
-        int index = fileName.lastIndexOf('.');
-        if (index == -1) {
-            return fileName;
-        }
-        return fileName.substring(0, index);
-    }
-
 }

@@ -13,7 +13,7 @@ import java.util.function.DoubleFunction;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 
 @Getter
-@NoArgsConstructor(access = AccessLevel.NONE)
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class WrappedImage {
     private int width;
     private int height;
@@ -35,6 +35,14 @@ public class WrappedImage {
             }
         }
         return wrappedImage;
+    }
+
+    public WrappedImage(int width, int height) {
+        if (width < 0 || height < 0)
+            throw new IllegalArgumentException("Размер не может быть отрицательным");
+        this.width = width;
+        this.height = height;
+        this.buffer = new double[width * height];
     }
 
     public BufferedImage save() {
@@ -64,9 +72,26 @@ public class WrappedImage {
         }
     }
 
+    public static WrappedImage getGradient(@NotNull WrappedImage xImage, @NotNull WrappedImage yImage) {
+        if (xImage.height != yImage.height || xImage.width != yImage.width)
+            throw new IllegalArgumentException("Изображения разного размера");
+        WrappedImage gradient = new WrappedImage(xImage.width, xImage.height);
+
+        for (int i = 0; i < gradient.buffer.length; i++) {
+            gradient.buffer[i] = Math.sqrt(sqr(xImage.buffer[i]) + sqr(yImage.buffer[i]));
+        }
+
+        return gradient;
+    }
+
+    @Contract(pure = true)
+    private static double sqr(double value) {
+        return value * value;
+    }
+
     public void normalize() {
         double maxIntensity = 0, minIntensity = 1;
-        double resultMaxIntensity = 1,resultMinIntensity = 0;
+        double resultMaxIntensity = 1, resultMinIntensity = 0;
         for (double value : buffer) {
             maxIntensity = Math.max(maxIntensity, value);
             minIntensity = Math.min(minIntensity, value);
