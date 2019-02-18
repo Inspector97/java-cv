@@ -11,6 +11,7 @@ import java.awt.image.BufferedImage;
 import java.util.function.DoubleFunction;
 
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
+import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -30,8 +31,9 @@ public class WrappedImage {
         for (int x = 0; x < image.getWidth(); x++) {
             for (int y = 0; y < image.getHeight(); y++) {
                 Color color = new Color(image.getRGB(x, y));
-                int gray = (int) (0.2126 * color.getRed() + 0.7152 * color.getGreen() + 0.0722 * color.getBlue());
-                wrappedImage.setPixel(x, y, gray / 255D);
+                double gray = 0.2126 * color.getRed() + 0.7152 * color.getGreen() + 0.0722 * color.getBlue();
+//                int gray = (int) (0.299 * color.getRed() + 0.587 * color.getGreen() + 0.114 * color.getBlue());
+                wrappedImage.setPixel(x, y, gray / 255);
             }
         }
         return wrappedImage;
@@ -55,7 +57,7 @@ public class WrappedImage {
     public static BufferedImage save(WrappedImage wrappedImage) {
         WrappedImage copied = new WrappedImage(wrappedImage);
         copied.normalize();
-        BufferedImage image = new BufferedImage(copied.width, copied.height, TYPE_BYTE_GRAY);
+        BufferedImage image = new BufferedImage(copied.width, copied.height, TYPE_INT_RGB);
         for (int x = 0; x < copied.width; x++) {
             for (int y = 0; y < copied.height; y++) {
                 int gray = (int) Math.round(copied.getPixel(x, y) * 255);
