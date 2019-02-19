@@ -7,8 +7,8 @@ import usr.afast.image.wrapped.WrappedImage;
 
 import java.awt.image.BufferedImage;
 
-import static usr.afast.image.util.StringArgsUtil.getBorderHandling;
 import static usr.afast.image.util.ImageIO.*;
+import static usr.afast.image.util.StringArgsUtil.getBorderHandling;
 
 public abstract class GradientProcessor implements Algorithm {
     @Override
