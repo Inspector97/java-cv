@@ -3,8 +3,6 @@ package usr.afast.image.math;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-
 import static java.lang.Math.exp;
 import static java.lang.Math.sqrt;
 

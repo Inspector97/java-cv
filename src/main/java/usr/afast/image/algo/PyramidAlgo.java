@@ -6,9 +6,9 @@ import usr.afast.image.util.Stopwatch;
 import usr.afast.image.wrapped.WrappedImage;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
 
-import static usr.afast.image.algo.AlgoLib.makeGauss;
-import static usr.afast.image.util.ImageIO.*;
+import static usr.afast.image.util.ImageIO.read;
 import static usr.afast.image.util.StringArgsUtil.*;
 
 public class PyramidAlgo implements Algorithm {
@@ -33,6 +33,10 @@ public class PyramidAlgo implements Algorithm {
         Pyramid pyramid = Stopwatch.measure(() -> Pyramid.build(wrappedImage, initSigma, startSigma, octaveSize));
 
         System.out.println(String.format("Pyramid built with depth=%d", pyramid.getDepth()));
+
+        File file = new File(path);
+        pyramid.save(path);
+
 //        System.out.println(String.format("Gauss with sigma %.3f", sigma));
 //        BufferedImage image = read(path);
 //        WrappedImage wrappedImage = WrappedImage.of(image);

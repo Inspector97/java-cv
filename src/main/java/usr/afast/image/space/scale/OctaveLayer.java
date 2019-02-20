@@ -7,6 +7,7 @@ import usr.afast.image.wrapped.WrappedImage;
 @Getter
 @AllArgsConstructor
 public class OctaveLayer {
+    private int index;
     private double localSigma;
     private double globalSigma;
     private WrappedImage image;

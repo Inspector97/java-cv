@@ -27,14 +27,14 @@ public class Octave {
         double globalSigma = startSigma * Math.pow(2, number);
 
         WrappedImage current = new WrappedImage(image);
-        octave.images.add(new OctaveLayer(localSigma, globalSigma, current));
+        octave.images.add(new OctaveLayer(0, localSigma, globalSigma, current));
         for (int i = 0; i < size; i++) {
             double nextSigma = localSigma * step;
             globalSigma = globalSigma * step;
             double delta = Math.sqrt(nextSigma * nextSigma - localSigma * localSigma);
 
             current = makeGauss(current, delta, BorderHandling.Mirror);
-            octave.images.add(new OctaveLayer(localSigma, globalSigma, current));
+            octave.images.add(new OctaveLayer(i + 1, localSigma, globalSigma, current));
 
             localSigma = nextSigma;
         }
