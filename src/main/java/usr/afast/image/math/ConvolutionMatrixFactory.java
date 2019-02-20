@@ -54,14 +54,19 @@ public class ConvolutionMatrixFactory {
         }
         double sum = 0;
         for (int i = 0; i < 2 * halfSize + 1; i++) {
-            for (int j = 0; j < 2 * halfSize + 1; j++) {
-                sum += vector[i] * vector[j];
-            }
+            sum += vector[i];
         }
         sum = Math.sqrt(sum);
         for (int i = 0; i < 2 * halfSize + 1; i++) {
             vector[i] /= sum;
         }
+        sum = 0;
+        for (int i = 0; i < 2 * halfSize + 1; i++) {
+            for (int j = 0; j < 2 * halfSize + 1; j++) {
+                sum += vector[i] + vector[i];
+            }
+        }
+        System.out.println(sum);
         return new SeparableConvolutionMatrix(Vector.of(vector), Vector.of(vector));
     }
 

@@ -6,7 +6,6 @@ import usr.afast.image.wrapped.WrappedImage;
 import static usr.afast.image.algo.AlgoLib.getScharrX;
 import static usr.afast.image.algo.AlgoLib.getScharrY;
 
-
 public class Scharr extends GradientProcessor {
     @Override
     public WrappedImage getXImage(WrappedImage wrappedImage, BorderHandling borderHandling) {
