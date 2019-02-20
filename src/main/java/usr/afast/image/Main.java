@@ -1,16 +1,15 @@
 package usr.afast.image;
 
 import org.jetbrains.annotations.NotNull;
-import usr.afast.image.algo.Gauss;
-import usr.afast.image.algo.Pruitt;
-import usr.afast.image.algo.Scharr;
-import usr.afast.image.algo.Sobel;
+import usr.afast.image.algo.*;
 import usr.afast.image.enums.AlgorithmType;
 
 import java.io.File;
+import java.util.Locale;
 
 public class Main {
     public static void main(@NotNull String[] args) {
+        Locale.setDefault(Locale.US);
         if (args.length < 2) {
             System.out.println("Invalid args");
             return;
@@ -40,6 +39,8 @@ public class Main {
                 break;
             case Gauss:
                 new Gauss().process(path, restArgs);
+            case Pyramid:
+                new PyramidAlgo().process(path, restArgs);
                 break;
             default:
                 System.out.println("Not implemented yet");

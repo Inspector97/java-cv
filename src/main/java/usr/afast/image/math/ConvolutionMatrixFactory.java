@@ -14,31 +14,37 @@ public class ConvolutionMatrixFactory {
     private static final double[] SCHARR_A_VERCTOR = {3, 10, 3};
     private static final double[] BORDER_B_VECTOR = {1, 0, -1};
 
+    @Contract(" -> new")
     @NotNull
     public static ConvolutionMatrix getSobelXMatrix() {
         return new SeparableConvolutionMatrix(Vector.of(SOBEL_A_VECTOR), Vector.of(BORDER_B_VECTOR));
     }
 
+    @Contract(" -> new")
     @NotNull
     public static ConvolutionMatrix getSobelYMatrix() {
         return new SeparableConvolutionMatrix(Vector.of(BORDER_B_VECTOR), Vector.of(SOBEL_A_VECTOR));
     }
 
+    @Contract(" -> new")
     @NotNull
     public static ConvolutionMatrix getPruittXMatrix() {
         return new SeparableConvolutionMatrix(Vector.of(PRUITT_A_VERCTOR), Vector.of(BORDER_B_VECTOR));
     }
 
+    @Contract(" -> new")
     @NotNull
     public static ConvolutionMatrix getPruittYMatrix() {
         return new SeparableConvolutionMatrix(Vector.of(BORDER_B_VECTOR), Vector.of(PRUITT_A_VERCTOR));
     }
 
+    @Contract(" -> new")
     @NotNull
     public static ConvolutionMatrix getScharrXMatrix() {
         return new SeparableConvolutionMatrix(Vector.of(SCHARR_A_VERCTOR), Vector.of(BORDER_B_VECTOR));
     }
 
+    @Contract(" -> new")
     @NotNull
     public static ConvolutionMatrix getScharrYMatrix() {
         return new SeparableConvolutionMatrix(Vector.of(BORDER_B_VECTOR), Vector.of(SCHARR_A_VERCTOR));
@@ -46,7 +52,17 @@ public class ConvolutionMatrixFactory {
 
     @NotNull
     public static ConvolutionMatrix getGaussMatrix(double sigma) {
-        int halfSize = (int) Math.ceil(3 * sigma);
+        return getGaussMatrix((int) Math.ceil(3 * sigma), sigma);
+    }
+
+    @NotNull
+    public static ConvolutionMatrix getGaussMatrix(int halfSize) {
+        return getGaussMatrix(halfSize, halfSize / 3D);
+    }
+
+    @Contract("_, _ -> new")
+    @NotNull
+    public static ConvolutionMatrix getGaussMatrix(int halfSize, double sigma) {
         double[] vector = new double[halfSize * 2 + 1];
         double coef = 1 / (sqrt(2 * Math.PI) * sigma);
         for (int x = -halfSize; x <= halfSize; x++) {
@@ -56,17 +72,9 @@ public class ConvolutionMatrixFactory {
         for (int i = 0; i < 2 * halfSize + 1; i++) {
             sum += vector[i];
         }
-        sum = Math.sqrt(sum);
         for (int i = 0; i < 2 * halfSize + 1; i++) {
             vector[i] /= sum;
         }
-        sum = 0;
-        for (int i = 0; i < 2 * halfSize + 1; i++) {
-            for (int j = 0; j < 2 * halfSize + 1; j++) {
-                sum += vector[i] + vector[i];
-            }
-        }
-        System.out.println(sum);
         return new SeparableConvolutionMatrix(Vector.of(vector), Vector.of(vector));
     }
 

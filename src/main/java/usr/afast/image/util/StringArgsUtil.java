@@ -10,4 +10,7 @@ public class StringArgsUtil {
     public static double getDouble(int index, @NotNull String... args) {
         return args.length > 0 ? Double.parseDouble(args[index]) : 0;
     }
+    public static int getInt(int index, @NotNull String... args) {
+        return args.length > 0 ? Integer.parseInt(args[index]) : 0;
+    }
 }

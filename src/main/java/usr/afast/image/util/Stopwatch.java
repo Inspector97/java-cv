@@ -6,8 +6,8 @@ import usr.afast.image.wrapped.WrappedImage;
 import java.util.function.Supplier;
 
 public class Stopwatch {
-    public static WrappedImage measure(@NotNull Supplier<WrappedImage> supplier) {
-        WrappedImage result;
+    public static <T> T measure(@NotNull Supplier<T> supplier) {
+        T result;
         System.out.println("Start processing");
         long startTime = System.currentTimeMillis();
         result = supplier.get();

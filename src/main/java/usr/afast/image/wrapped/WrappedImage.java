@@ -38,7 +38,7 @@ public class WrappedImage {
         return wrappedImage;
     }
 
-    private WrappedImage(@NotNull WrappedImage wrappedImage) {
+    public WrappedImage(@NotNull WrappedImage wrappedImage) {
         width = wrappedImage.width;
         height = wrappedImage.height;
         buffer = new double[width * height];
@@ -116,5 +116,17 @@ public class WrappedImage {
         if (x < 0 || x >= width || y < 0 || y >= height)
             throw new IllegalArgumentException(String.format("Pixel position out of borders (%d, %d)", x, y));
         return x * height + y;
+    }
+
+    public WrappedImage downSample() {
+        int newWidth = width / 2;
+        int newHeight = height / 2;
+        WrappedImage result = new WrappedImage(newWidth, newHeight);
+        for (int i = 0; i < newWidth; i++) {
+            for (int j = 0; j < newHeight; j++) {
+                result.setPixel(i, j, getPixel(i * 2, j * 2));
+            }
+        }
+        return result;
     }
 }
