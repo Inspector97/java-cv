@@ -36,7 +36,7 @@ public class PyramidAlgo implements Algorithm {
 
         File file = new File(path);
         pyramid.save(path);
-        pyramid.getPixel(2, 5, 4);
+//        pyramid.getPixel(2, 5, 4);
 
 //        System.out.println(String.format("Gauss with sigma %.3f", sigma));
 //        BufferedImage image = read(path);

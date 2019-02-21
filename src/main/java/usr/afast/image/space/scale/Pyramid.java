@@ -64,7 +64,6 @@ public class Pyramid {
         WrappedImage image = octaves.get(octaveIndex).getImages().get(index % octaveSize).getImage();
         System.out.println(image.getHeight());
         int scale = (int) Math.ceil(Math.pow(2, octaveIndex));
-        System.out.println((x / scale) + ", " + (y / scale));
         return image.getPixel((x / scale), (y / scale));
     }
 
