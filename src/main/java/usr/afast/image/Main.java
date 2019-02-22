@@ -42,6 +42,9 @@ public class Main {
             case Pyramid:
                 new PyramidAlgo().process(path, restArgs);
                 break;
+            case Moravec:
+                new MoravecAlgo().process(path, restArgs);
+                break;
             default:
                 System.out.println("Not implemented yet");
         }

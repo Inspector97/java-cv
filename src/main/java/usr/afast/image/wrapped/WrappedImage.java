@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import usr.afast.image.enums.BorderHandling;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -15,6 +16,8 @@ import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class WrappedImage {
+    private static final double BLACK = 0;
+    private static final double WHITE = 1;
     private int width;
     private int height;
 
@@ -73,6 +76,42 @@ public class WrappedImage {
     public double getPixel(int x, int y) {
         return buffer[getPosition(x, y)];
     }
+
+
+    public double getPixel(int x, int y, @NotNull BorderHandling borderHandling) {
+        switch (borderHandling) {
+            case Black:
+                if (x < 0 || x >= getWidth() || y < 0 || y >= getHeight())
+                    return BLACK;
+                return getPixel(x, y);
+            case White:
+                if (x < 0 || x >= getWidth() || y < 0 || y >= getHeight())
+                    return WHITE;
+                return getPixel(x, y);
+            case Copy:
+                x = border(x, 0, getWidth() - 1);
+                y = border(y, 0, getHeight() - 1);
+                return getPixel(x, y);
+            case Wrap:
+                x = (x + getWidth()) % getWidth();
+                y = (y + getHeight()) % getHeight();
+                return getPixel(x, y);
+            case Mirror:
+                x = Math.abs(x);
+                y = Math.abs(y);
+                if (x >= getWidth()) x = getWidth() - (x - getWidth() + 1);
+                if (y >= getHeight()) y = getHeight() - (y - getHeight() + 1);
+                return getPixel(x, y);
+            default:
+                return BLACK;
+        }
+    }
+
+    @SuppressWarnings("SameParameterValue")
+    private int border(int value, int min, int max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
 
     public void forEach(DoubleFunction<Double> function) {
         for (int i = 0; i < buffer.length; i++) {
