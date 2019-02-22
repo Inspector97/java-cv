@@ -26,9 +26,9 @@ public class PyramidAlgo implements Algorithm {
         WrappedImage wrappedImage = WrappedImage.of(image);
 
         System.out.println(String.format("Building pyramid with initSigma=%.3f, startSigma=%.3f, octaveSize=%d",
-                                         initSigma,
-                                         startSigma,
-                                         octaveSize));
+                initSigma,
+                startSigma,
+                octaveSize));
 
         Pyramid pyramid = Stopwatch.measure(() -> Pyramid.build(wrappedImage, initSigma, startSigma, octaveSize));
 
@@ -36,6 +36,7 @@ public class PyramidAlgo implements Algorithm {
 
         File file = new File(path);
         pyramid.save(path);
+//        pyramid.getPixel(2, 5, 4);
 
 //        System.out.println(String.format("Gauss with sigma %.3f", sigma));
 //        BufferedImage image = read(path);
