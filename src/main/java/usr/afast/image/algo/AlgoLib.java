@@ -11,6 +11,12 @@ public class AlgoLib {
                                                            ConvolutionMatrixFactory.getGaussMatrix(sigma),
                                                            borderHandling);
     }
+    public static WrappedImage makeGauss(WrappedImage wrappedImage, int halfSize, double sigma,
+                                         BorderHandling borderHandling) {
+        return ImageMatrixProcessor.processWithConvolution(wrappedImage,
+                                                           ConvolutionMatrixFactory.getGaussMatrix(halfSize, sigma),
+                                                           borderHandling);
+    }
     public static WrappedImage getSobelX(WrappedImage wrappedImage, BorderHandling borderHandling) {
         return ImageMatrixProcessor.processWithConvolution(wrappedImage,
                                                            ConvolutionMatrixFactory.getSobelXMatrix(),
