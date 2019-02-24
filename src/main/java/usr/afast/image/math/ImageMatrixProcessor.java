@@ -35,7 +35,7 @@ public class ImageMatrixProcessor {
             for (int y = 0; y < image.getHeight(); y++) {
                 double sum = 0;
                 for (int dx = -xRadius; dx <= xRadius; dx++) {
-                    sum += xVector.getVector()[dx + xRadius] * image.getPixel(x + dx, y, borderHandling);
+                    sum += xVector.getVector()[xRadius - dx] * image.getPixel(x + dx, y, borderHandling);
                 }
                 firstResult.setPixel(x, y, sum);
             }
@@ -45,7 +45,7 @@ public class ImageMatrixProcessor {
             for (int y = 0; y < image.getHeight(); y++) {
                 double sum = 0;
                 for (int dy = -yRadius; dy <= yRadius; dy++) {
-                    sum += yVector.getVector()[dy + yRadius] * firstResult.getPixel(x, y + dy, borderHandling);
+                    sum += yVector.getVector()[yRadius - dy] * firstResult.getPixel(x, y + dy, borderHandling);
                 }
                 result.setPixel(x, y, sum);
             }
@@ -64,7 +64,7 @@ public class ImageMatrixProcessor {
                 double sum = 0;
                 for (int dx = -xRadius; dx <= xRadius; dx++) {
                     for (int dy = -yRadius; dy <= yRadius; dy++) {
-                        sum += matrix.getMatrix()[dx + xRadius][dy + yRadius] *
+                        sum += matrix.getMatrix()[xRadius - dx][yRadius - dy] *
                                image.getPixel(x + dx, y + dy, borderHandling);
                     }
                 }
