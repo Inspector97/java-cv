@@ -13,11 +13,12 @@ import java.util.stream.Collectors;
 import static usr.afast.image.util.Math.sqr;
 
 public class Moravec {
-    private static double MIN_PROBABILITY = 0.1;
-    private static int MAX_SIZE = 1000;
+    private static double MIN_PROBABILITY = 0.05;
+    private static int MAX_SIZE = 2000;
     private static final int[] dx = {-1, 0, 1, -1, 1, -1, 0, -1};
     private static final int[] dy = {-1, -1, -1, 0, 0, 1, 1, 1};
 
+    @NotNull
     public static List<InterestingPoint> makeMoravec(@NotNull WrappedImage image) {
         int width = image.getWidth();
         int height = image.getHeight();
