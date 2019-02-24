@@ -13,11 +13,11 @@ public class PointMarker {
 
         Graphics graphics = bufferedImage.createGraphics();
         graphics.setColor(Color.GREEN);
-        int radius = 1;
+        int radius = 2;
         for (InterestingPoint interestingPoint : interestingPoints) {
             int x = interestingPoint.getX() - radius;
             int y = interestingPoint.getY() - radius;
-            graphics.fillOval(x, y, 2 * radius, 2 * radius);
+            graphics.drawOval(x, y, 2 * radius, 2 * radius);
         }
         graphics.dispose();
 

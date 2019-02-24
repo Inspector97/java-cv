@@ -13,7 +13,8 @@ import java.util.stream.Collectors;
 import static usr.afast.image.util.Math.sqr;
 
 public class Moravec {
-    private static double MIN_PROBABILITY = 0.5;
+    private static double MIN_PROBABILITY = 0.1;
+    private static int MAX_SIZE = 1000;
     private static final int[] dx = {-1, 0, 1, -1, 1, -1, 0, -1};
     private static final int[] dy = {-1, -1, -1, 0, 0, 1, 1, 1};
 
@@ -23,11 +24,11 @@ public class Moravec {
         double[][] errors = getErrors(image);
         double[][] mins = getMinimums(errors, width, height);
         List<InterestingPoint> candidates = getCandidates(mins, width, height);
-        candidates.sort(Comparator.comparingDouble(InterestingPoint::getProbability));
         candidates = candidates.stream()
                                .filter(candidate -> candidate.getProbability() > MIN_PROBABILITY)
                                .collect(Collectors.toList());
-        return candidates;
+        candidates.sort((a, b) -> Double.compare(b.getProbability(), a.getProbability()));
+        return candidates.subList(0, Math.min(candidates.size(), MAX_SIZE));
     }
 
     private static List<InterestingPoint> getCandidates(double[][] mins, int width, int height) {
