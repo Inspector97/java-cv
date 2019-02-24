@@ -17,17 +17,16 @@ public abstract class GradientProcessor implements Algorithm {
         BufferedImage image = read(path);
         WrappedImage wrappedImage = WrappedImage.of(image);
         WrappedImage result = Stopwatch.measure(() -> calcGradient(path, wrappedImage, borderHandling));
-        BufferedImage bufferedImageResult = WrappedImage.save(result);
         String newFilePath = getSaveFilePath(path, getClass().getSimpleName());
-        write(newFilePath, bufferedImageResult);
+        write(newFilePath, result);
     }
 
     private WrappedImage calcGradient(String path, WrappedImage wrappedImage, BorderHandling borderHandling) {
         WrappedImage xImage = getXImage(wrappedImage, borderHandling);
         WrappedImage yImage = getYImage(wrappedImage, borderHandling);
         WrappedImage result = WrappedImage.getGradient(xImage, yImage);
-        write(getSaveFilePath(path, getClass().getSimpleName() + "_X"), WrappedImage.save(xImage));
-        write(getSaveFilePath(path, getClass().getSimpleName() + "_Y"), WrappedImage.save(yImage));
+        write(getSaveFilePath(path, getClass().getSimpleName() + "_X"), xImage);
+        write(getSaveFilePath(path, getClass().getSimpleName() + "_Y"), yImage);
         return result;
     }
 

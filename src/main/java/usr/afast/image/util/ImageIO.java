@@ -2,6 +2,7 @@ package usr.afast.image.util;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import usr.afast.image.wrapped.WrappedImage;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -19,6 +20,10 @@ public class ImageIO {
             e.printStackTrace();
         }
         return image;
+    }
+
+    public static boolean write(String path, WrappedImage image) {
+        return write(path, WrappedImage.save(image));
     }
 
     public static boolean write(String path, BufferedImage image) {
