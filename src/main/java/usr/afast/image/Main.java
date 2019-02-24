@@ -45,6 +45,9 @@ public class Main {
             case Moravec:
                 new MoravecAlgo().process(path, restArgs);
                 break;
+            case Harris:
+                new HarrisAlgo().process(path, restArgs);
+                break;
             default:
                 System.out.println("Not implemented yet");
         }

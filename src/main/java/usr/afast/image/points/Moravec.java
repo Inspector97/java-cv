@@ -1,6 +1,7 @@
 package usr.afast.image.points;
 
 import org.jetbrains.annotations.NotNull;
+import usr.afast.image.algo.Detector;
 import usr.afast.image.enums.BorderHandling;
 import usr.afast.image.wrapped.WrappedImage;
 
@@ -8,8 +9,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static usr.afast.image.util.DetectorUtil.getCandidates;
 import static usr.afast.image.util.Math.sqr;
 
+@SuppressWarnings("Duplicates")
 public class Moravec {
     private static double MIN_PROBABILITY = 0.05;
     private static int MAX_SIZE = 2000;
@@ -30,27 +33,6 @@ public class Moravec {
         return candidates.subList(0, Math.min(candidates.size(), MAX_SIZE));
     }
 
-    private static List<InterestingPoint> getCandidates(double[][] mins, int width, int height) {
-        List<InterestingPoint> candidates = new LinkedList<>();
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-                boolean ok = true;
-                double currentValue = mins[i][j];
-                for (int k = 0; k < dx.length && ok; k++) {
-                    if (i + dx[k] < 0 ||
-                        i + dx[k] >= width ||
-                        j + dy[k] < 0 ||
-                        j + dy[k] >= height) continue;
-                    if (currentValue < mins[i + dx[k]][j + dy[k]])
-                        ok = false;
-                }
-                if (ok) {
-                    candidates.add(InterestingPoint.at(i, j, mins[i][j]));
-                }
-            }
-        }
-        return candidates;
-    }
 
     private static double[][] getMinimums(@NotNull WrappedImage image, int width, int height) {
         double[][] mins = new double[width][height];
