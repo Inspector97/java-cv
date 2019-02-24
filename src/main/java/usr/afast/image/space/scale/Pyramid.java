@@ -15,7 +15,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static usr.afast.image.algo.AlgoLib.makeGauss;
-import static usr.afast.image.util.ImageIO.*;
+import static usr.afast.image.util.ImageIO.getSaveFilePath;
+import static usr.afast.image.util.ImageIO.write;
 
 @Getter
 public class Pyramid {

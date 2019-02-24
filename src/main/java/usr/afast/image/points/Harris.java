@@ -1,15 +1,10 @@
 package usr.afast.image.points;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import org.apache.commons.math3.linear.EigenDecomposition;
-import org.apache.commons.math3.linear.MatrixUtils;
-import org.apache.commons.math3.linear.RealMatrix;
 import org.jetbrains.annotations.NotNull;
 import usr.afast.image.enums.BorderHandling;
 import usr.afast.image.wrapped.WrappedImage;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 

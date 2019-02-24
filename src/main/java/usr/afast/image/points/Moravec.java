@@ -1,11 +1,9 @@
 package usr.afast.image.points;
 
 import org.jetbrains.annotations.NotNull;
-import usr.afast.image.algo.Detector;
 import usr.afast.image.enums.BorderHandling;
 import usr.afast.image.wrapped.WrappedImage;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 

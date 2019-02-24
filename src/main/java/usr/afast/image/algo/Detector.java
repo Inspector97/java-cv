@@ -1,7 +1,6 @@
 package usr.afast.image.algo;
 
 import usr.afast.image.points.InterestingPoint;
-import usr.afast.image.points.Moravec;
 import usr.afast.image.util.Stopwatch;
 import usr.afast.image.wrapped.WrappedImage;
 
