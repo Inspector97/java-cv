@@ -7,6 +7,7 @@ import usr.afast.image.wrapped.WrappedImage;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static usr.afast.image.algo.AlgoLib.makeGauss;
 import static usr.afast.image.util.DetectorUtil.getCandidates;
 import static usr.afast.image.util.Math.sqr;
 
@@ -20,6 +21,7 @@ public class Moravec {
 
     @NotNull
     public static List<InterestingPoint> makeMoravec(@NotNull WrappedImage image) {
+        image = makeGauss(image, 0.66, BorderHandling.Mirror);
         int width = image.getWidth();
         int height = image.getHeight();
         double[][] mins = getMinimums(image, width, height);
