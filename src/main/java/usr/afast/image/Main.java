@@ -48,6 +48,9 @@ public class Main {
             case Harris:
                 new HarrisAlgo().process(path, restArgs);
                 break;
+            case Canny:
+                new CannyAlgo().process(path, restArgs);
+                break;
             default:
                 System.out.println("Not implemented yet");
         }

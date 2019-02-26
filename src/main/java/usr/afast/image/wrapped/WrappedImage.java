@@ -40,6 +40,23 @@ public class WrappedImage {
         return wrappedImage;
     }
 
+    public static WrappedImage of(@NotNull double[][] buffer) {
+        WrappedImage wrappedImage = new WrappedImage();
+        wrappedImage.width = buffer.length;
+        if (buffer.length > 0) {
+            wrappedImage.height = buffer[0].length;
+        } else {
+            wrappedImage.height = 0;
+        }
+        wrappedImage.buffer = new double[wrappedImage.width * wrappedImage.height];
+        for (int i = 0; i < wrappedImage.width; i++) {
+            for (int j = 0; j < wrappedImage.height; j++) {
+                wrappedImage.setPixel(i, j, buffer[i][j]);
+            }
+        }
+        return wrappedImage;
+    }
+
     public WrappedImage(@NotNull WrappedImage wrappedImage) {
         width = wrappedImage.width;
         height = wrappedImage.height;

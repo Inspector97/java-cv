@@ -8,7 +8,6 @@ import java.awt.image.BufferedImage;
 import java.util.List;
 
 import static usr.afast.image.points.PointMarker.markPoints;
-import static usr.afast.image.points.PointsFilter.filterPoints;
 import static usr.afast.image.points.PointsFilter.filterPointsFast;
 import static usr.afast.image.util.ImageIO.*;
 import static usr.afast.image.util.StringArgsUtil.getInt;

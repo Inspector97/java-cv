@@ -4,5 +4,5 @@ import lombok.Getter;
 
 @Getter
 public enum AlgorithmType {
-    Gauss, Pruitt, Scharr, Sobel, Lab1, Pyramid, Moravec, Harris
+    Gauss, Pruitt, Scharr, Sobel, Lab1, Pyramid, Moravec, Harris, Canny
 }

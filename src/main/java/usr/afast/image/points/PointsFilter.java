@@ -28,7 +28,7 @@ public class PointsFilter {
         return filter(interestingPoints, l);
     }
 
-    public static List<InterestingPoint> filterPointsFast(List<InterestingPoint> interestingPoints, int maxSize) {
+    public static List<InterestingPoint> filterPointsFast(@NotNull List<InterestingPoint> interestingPoints, int maxSize) {
         if (maxSize >= interestingPoints.size())
             return interestingPoints;
         if (maxSize < 0)
