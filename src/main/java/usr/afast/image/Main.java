@@ -51,6 +51,9 @@ public class Main {
             case Canny:
                 new CannyAlgo().process(path, restArgs);
                 break;
+            case Patch:
+                new PatchAlgo().process(path, restArgs);
+                break;
             default:
                 System.out.println("Not implemented yet");
         }

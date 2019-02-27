@@ -37,7 +37,7 @@ public class Harris {
             for (int j = 0; j < height; j++)
                 temp.setPixel(i, j, harris[i][j]);
 
-        write(TEMP_PATH, temp);
+//        write(TEMP_PATH, temp);
 
         List<InterestingPoint> candidates = getCandidates(harris, width, height);
 
