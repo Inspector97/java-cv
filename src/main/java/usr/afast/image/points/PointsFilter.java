@@ -25,7 +25,8 @@ public class PointsFilter {
                 r = middle;
             }
         }
-        return filter(interestingPoints, l);
+        List<InterestingPoint> filter = filter(interestingPoints, l);
+        return filter.subList(0, Math.min(filter.size(), maxSize));
     }
 
     public static List<InterestingPoint> filterPointsFast(@NotNull List<InterestingPoint> interestingPoints, int maxSize) {
@@ -39,7 +40,7 @@ public class PointsFilter {
             double distance = Double.MAX_VALUE;
             for (InterestingPoint anotherPoint : interestingPoints) {
                 if (point.equals(anotherPoint)) continue;
-                if (anotherPoint.getProbability() > point.getProbability()) {
+                if (point.getProbability() <  anotherPoint.getProbability()) {
                     if (distance > InterestingPoint.distance(point, anotherPoint)) {
                         distance = InterestingPoint.distance(point, anotherPoint);
                     }

@@ -8,7 +8,7 @@ import java.awt.image.BufferedImage;
 import java.util.List;
 
 import static usr.afast.image.points.PointMarker.markPoints;
-import static usr.afast.image.points.PointsFilter.filterPointsFast;
+import static usr.afast.image.points.PointsFilter.filterPoints;
 import static usr.afast.image.util.ImageIO.*;
 import static usr.afast.image.util.StringArgsUtil.getInt;
 
@@ -26,7 +26,7 @@ public abstract class Detector implements Algorithm {
 //        System.out.println("Filtered points: " + filtered.size());
 
         System.out.println("Filtering fast");
-        List<InterestingPoint> filtered2 = Stopwatch.measure(() -> filterPointsFast(interestingPoints, maxPoints));
+        List<InterestingPoint> filtered2 = Stopwatch.measure(() -> filterPoints(interestingPoints, maxPoints));
         System.out.println("Filtered fast points: " + filtered2.size());
 
         BufferedImage resultAll = markPoints(interestingPoints, wrappedImage);

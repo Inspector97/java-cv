@@ -4,25 +4,22 @@ import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import usr.afast.image.enums.BorderHandling;
 import usr.afast.image.math.ConvolutionMatrix;
-import usr.afast.image.math.SeparableConvolutionMatrix;
 import usr.afast.image.wrapped.WrappedImage;
 
-import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static usr.afast.image.algo.AlgoLib.*;
 import static usr.afast.image.math.ConvolutionMatrixFactory.getGaussMatrix;
 import static usr.afast.image.util.DetectorUtil.getCandidates;
-import static usr.afast.image.util.ImageIO.write;
 import static usr.afast.image.util.Math.sqr;
 
 @SuppressWarnings("Duplicates")
 public class Harris {
     private static final String TEMP_PATH = "E:\\test_images\\grid\\temp.png";
-    private static double MIN_PROBABILITY = 0.005;
-    private static int MAX_SIZE = 2000;
-    private static final int WINDOW_RADIUS = 6;
+    private static double MIN_PROBABILITY = 0.05;
+    private static int MAX_SIZE = 800;
+    private static final int WINDOW_RADIUS = 4;
 
     @NotNull
     public static List<InterestingPoint> makeHarris(@NotNull WrappedImage image) {

@@ -2,17 +2,14 @@ package usr.afast.image.algo;
 
 import usr.afast.image.descriptor.PatchProcessor;
 import usr.afast.image.descriptor.PointsPair;
-import usr.afast.image.enums.BorderHandling;
 import usr.afast.image.util.Stopwatch;
 import usr.afast.image.wrapped.WrappedImage;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
 import static usr.afast.image.points.PointMarker.markMatching;
 import static usr.afast.image.util.ImageIO.*;
-import static usr.afast.image.util.StringArgsUtil.getBorderHandling;
 import static usr.afast.image.util.StringArgsUtil.getInt;
 
 public class PatchAlgo implements Algorithm {

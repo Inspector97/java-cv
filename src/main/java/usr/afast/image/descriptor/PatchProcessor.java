@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import static usr.afast.image.algo.AlgoLib.getSobelX;
 import static usr.afast.image.algo.AlgoLib.getSobelY;
 import static usr.afast.image.points.Harris.makeHarris;
-import static usr.afast.image.points.PointsFilter.filterPointsFast;
+import static usr.afast.image.points.PointsFilter.filterPoints;
 
 public class PatchProcessor {
     private static final int POINTS = 30;
@@ -25,8 +25,8 @@ public class PatchProcessor {
         gradientA.normalize();
         gradientB.normalize();
 
-        List<InterestingPoint> pointsA = filterPointsFast(makeHarris(imageA), POINTS);
-        List<InterestingPoint> pointsB = filterPointsFast(makeHarris(imageB), POINTS);
+        List<InterestingPoint> pointsA = filterPoints(makeHarris(imageA), POINTS);
+        List<InterestingPoint> pointsB = filterPoints(makeHarris(imageB), POINTS);
 
         List<PatchDescriptor> descriptorsA = getDescriptors(gradientA, pointsA, gridHalfSize, cellHalfSize);
         List<PatchDescriptor> descriptorsB = getDescriptors(gradientB, pointsB, gridHalfSize, cellHalfSize);
