@@ -15,7 +15,6 @@ import java.util.Queue;
 import static usr.afast.image.algo.AlgoLib.*;
 import static usr.afast.image.util.ImageIO.getSaveFilePath;
 import static usr.afast.image.util.ImageIO.write;
-import static usr.afast.image.util.Math.sqr;
 
 public class Canny {
 
@@ -25,10 +24,10 @@ public class Canny {
 
     static {
         angleShiftMap = new HashMap<>();
-        angleShiftMap.put(Angle._0, new Shift(0, 1, 0, -1));
-        angleShiftMap.put(Angle._45, new Shift(1, -1, -1, 1));
         angleShiftMap.put(Angle._90, new Shift(1, 0, -1, 0));
-        angleShiftMap.put(Angle._135, new Shift(1, 1, -1, -1));
+        angleShiftMap.put(Angle._135, new Shift(1, -1, -1, 1));
+        angleShiftMap.put(Angle._0, new Shift(0, -1, 0, 1));
+        angleShiftMap.put(Angle._45, new Shift(-1, -1, 1, 1 ));
     }
 
     public static WrappedImage canny(String path, @NotNull WrappedImage image) {
@@ -40,13 +39,14 @@ public class Canny {
         WrappedImage yImage = getSobelY(blurred, BorderHandling.Mirror);
 
         WrappedImage gradient = WrappedImage.getGradient(xImage, yImage);
+        gradient.normalize();
         Angle[][] gradientDirection = getGradientDirection(xImage, yImage);
 
-        write(getSaveFilePath(path, "_TEMP_1"), gradient);
+        write(getSaveFilePath(path, "TEMP_1"), gradient);
 
         WrappedImage nonMaximumSuppressed = suppressNonMaximum(width, height, gradient, gradientDirection);
 
-        write(getSaveFilePath(path, "_TEMP_2"), nonMaximumSuppressed);
+        write(getSaveFilePath(path, "TEMP_2"), nonMaximumSuppressed);
 
         boolean[][] marked = new boolean[width][height];
         Queue<Point> queue = new LinkedList<>();
@@ -151,7 +151,7 @@ public class Canny {
 
     @AllArgsConstructor
     @Getter
-    static class Shift {
+    private static class Shift {
         private int dx1;
         private int dy1;
         private int dx2;
@@ -160,7 +160,7 @@ public class Canny {
 
     @AllArgsConstructor(staticName = "at")
     @Getter
-    static class Point {
+    private static class Point {
         private int x;
         private int y;
     }
