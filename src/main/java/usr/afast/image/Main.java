@@ -54,6 +54,9 @@ public class Main {
             case Patch:
                 new PatchAlgo().process(path, restArgs);
                 break;
+            case Sift:
+                new SiftAlgo().process(path, restArgs);
+                break;
             default:
                 System.out.println("Not implemented yet");
         }

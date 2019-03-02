@@ -13,6 +13,7 @@ import java.util.function.DoubleFunction;
 
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 
+@SuppressWarnings("Duplicates")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class WrappedImage {
@@ -146,6 +147,18 @@ public class WrappedImage {
         }
 
         return gradient;
+    }
+
+    public static WrappedImage getGradientAngle(@NotNull WrappedImage xImage, @NotNull WrappedImage yImage) {
+        if (xImage.height != yImage.height || xImage.width != yImage.width)
+            throw new IllegalArgumentException("Изображения разного размера");
+        WrappedImage gradientAngle = new WrappedImage(xImage.width, xImage.height);
+
+        for (int i = 0; i < gradientAngle.buffer.length; i++) {
+            gradientAngle.buffer[i] = Math.atan2(yImage.buffer[i], xImage.buffer[i]);
+        }
+
+        return gradientAngle;
     }
 
     @Contract(pure = true)
