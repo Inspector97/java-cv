@@ -12,6 +12,7 @@ import usr.afast.image.wrapped.Matrix;
 import static usr.afast.image.math.ConvolutionMatrixFactory.getGaussMatrices;
 import static usr.afast.image.math.ConvolutionMatrixFactory.separableMatrixFrom;
 
+@SuppressWarnings("Duplicates")
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class SIFTDescriptor extends AbstractDescriptor {
     private double[] descriptor;

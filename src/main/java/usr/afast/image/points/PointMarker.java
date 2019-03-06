@@ -28,13 +28,13 @@ public class PointMarker {
         return bufferedImage;
     }
 
-    public static BufferedImage markMatching(Matrix imageA, Matrix imageB, List<PointsPair> matching) {
+    public static BufferedImage markMatching(Matrix imageA, Matrix imageB, @NotNull List<PointsPair> matching) {
         BufferedImage bufferedA = Matrix.save(imageA);
         BufferedImage bufferedB = Matrix.save(imageB);
         BufferedImage result = new BufferedImage(bufferedA.getWidth() + bufferedB.getWidth(),
                                                  Math.max(bufferedA.getHeight(), bufferedB.getHeight()),
                                                  BufferedImage.TYPE_INT_ARGB);
-        Graphics2D  graphics = result.createGraphics();
+        Graphics2D graphics = result.createGraphics();
 
         graphics.drawImage(bufferedA, 0, 0, null);
         graphics.drawImage(bufferedB, bufferedA.getWidth(), 0, null);
@@ -51,7 +51,7 @@ public class PointMarker {
             int yB = pointsPair.getPointB().getY() - radius;
             graphics.drawOval(xB, yB, 2 * radius, 2 * radius);
 
-            graphics.drawLine(xA, yA, xB, yB);
+            graphics.drawLine(xA + radius, yA + radius, xB + radius, yB + radius);
         }
 
         graphics.dispose();
