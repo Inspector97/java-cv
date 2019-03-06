@@ -2,7 +2,7 @@ package usr.afast.image.points;
 
 import org.jetbrains.annotations.NotNull;
 import usr.afast.image.enums.BorderHandling;
-import usr.afast.image.wrapped.WrappedImage;
+import usr.afast.image.wrapped.Matrix;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,11 +20,11 @@ public class Moravec {
     private static final int WINDOW_RADIUS = 2;
 
     @NotNull
-    public static List<InterestingPoint> makeMoravec(@NotNull WrappedImage image) {
+    public static List<InterestingPoint> makeMoravec(@NotNull Matrix image) {
         image = makeGauss(image, 0.66, BorderHandling.Mirror);
         int width = image.getWidth();
         int height = image.getHeight();
-        double[][] mins = getMinimums(image, width, height);
+        Matrix mins = getMinimums(image, width, height);
         List<InterestingPoint> candidates = getCandidates(mins, width, height);
         candidates = candidates.stream()
                                .filter(candidate -> candidate.getProbability() > MIN_PROBABILITY)
@@ -34,8 +34,8 @@ public class Moravec {
     }
 
 
-    private static double[][] getMinimums(@NotNull WrappedImage image, int width, int height) {
-        double[][] mins = new double[width][height];
+    private static Matrix getMinimums(@NotNull Matrix image, int width, int height) {
+        Matrix mins = new Matrix(width, height);
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 double min = Double.MAX_VALUE;
@@ -43,13 +43,13 @@ public class Moravec {
                     double sum = 0;
                     for (int u = -WINDOW_RADIUS; u <= WINDOW_RADIUS; u++) {
                         for (int v = -WINDOW_RADIUS; v <= WINDOW_RADIUS; v++) {
-                            sum += sqr(image.getPixel(i + u, j + v, BorderHandling.Mirror) -
-                                       image.getPixel(i + u + dx[k], j + v + dy[k], BorderHandling.Mirror));
+                            sum += sqr(image.getAt(i + u, j + v, BorderHandling.Mirror) -
+                                       image.getAt(i + u + dx[k], j + v + dy[k], BorderHandling.Mirror));
                         }
                     }
                     min = Math.min(min, sum);
                 }
-                mins[i][j] = min;
+                mins.setAt(i, j, min);
             }
         }
         return mins;

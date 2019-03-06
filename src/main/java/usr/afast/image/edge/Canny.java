@@ -5,7 +5,7 @@ import lombok.Getter;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import usr.afast.image.enums.BorderHandling;
-import usr.afast.image.wrapped.WrappedImage;
+import usr.afast.image.wrapped.Matrix;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -30,21 +30,21 @@ public class Canny {
         angleShiftMap.put(Angle._45, new Shift(-1, -1, 1, 1 ));
     }
 
-    public static WrappedImage canny(String path, @NotNull WrappedImage image) {
+    public static Matrix canny(String path, @NotNull Matrix image) {
         int width = image.getWidth();
         int height = image.getHeight();
-        WrappedImage blurred = makeGauss(image, 2, 1.4, BorderHandling.Mirror);
+        Matrix blurred = makeGauss(image, 2, 1.4, BorderHandling.Mirror);
 
-        WrappedImage xImage = getSobelX(blurred, BorderHandling.Mirror);
-        WrappedImage yImage = getSobelY(blurred, BorderHandling.Mirror);
+        Matrix xImage = getSobelX(blurred, BorderHandling.Mirror);
+        Matrix yImage = getSobelY(blurred, BorderHandling.Mirror);
 
-        WrappedImage gradient = WrappedImage.getGradient(xImage, yImage);
-        gradient.normalize();
+        Matrix gradient = Matrix.getGradient(xImage, yImage);
+        gradient = Matrix.normalize(gradient);
         Angle[][] gradientDirection = getGradientDirection(xImage, yImage);
 
         write(getSaveFilePath(path, "TEMP_1"), gradient);
 
-        WrappedImage nonMaximumSuppressed = suppressNonMaximum(width, height, gradient, gradientDirection);
+        Matrix nonMaximumSuppressed = suppressNonMaximum(width, height, gradient, gradientDirection);
 
         write(getSaveFilePath(path, "TEMP_2"), nonMaximumSuppressed);
 
@@ -53,7 +53,7 @@ public class Canny {
 
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                if (isHigh(nonMaximumSuppressed.getPixel(i, j))) {
+                if (isHigh(nonMaximumSuppressed.getAt(i, j))) {
                     marked[i][j] = true;
                     queue.add(Point.at(i, j));
                 }
@@ -67,7 +67,7 @@ public class Canny {
                     int nx = cur.x + dx;
                     int ny = cur.y + dy;
                     if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
-                    if (isLow(nonMaximumSuppressed.getPixel(nx, ny)) && !marked[nx][ny]) {
+                    if (isLow(nonMaximumSuppressed.getAt(nx, ny)) && !marked[nx][ny]) {
                         marked[nx][ny] = true;
                         queue.add(Point.at(nx, ny));
                     }
@@ -75,12 +75,12 @@ public class Canny {
             }
         }
 
-        WrappedImage result = new WrappedImage(width, height);
+        Matrix result = new Matrix(width, height);
 
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 if (marked[i][j]) {
-                    result.setPixel(i, j, 1);
+                    result.setAt(i, j, 1);
                 }
             }
         }
@@ -98,34 +98,34 @@ public class Canny {
         return value > HIGH_THRESHOLD;
     }
 
-    private static WrappedImage suppressNonMaximum(int width, int height, WrappedImage gradient, Angle[][] gradientDirection) {
-        WrappedImage result = new WrappedImage(width, height);
+    private static Matrix suppressNonMaximum(int width, int height, Matrix gradient, Angle[][] gradientDirection) {
+        Matrix result = new Matrix(width, height);
 
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                double pixel = gradient.getPixel(i, j);
+                double pixel = gradient.getAt(i, j);
                 Shift shift = angleShiftMap.get(gradientDirection[i][j]);
                 double pixelA = getPixel(gradient, i + shift.dx1, j + shift.dy1);
                 double pixelB = getPixel(gradient, i + shift.dx2, j + shift.dy2);
                 if (pixel > pixelA - 1e-3 && pixel > pixelB - 1e-3)
-                    result.setPixel(i, j, pixel);
+                    result.setAt(i, j, pixel);
             }
         }
 
         return result;
     }
 
-    private static double getPixel(@NotNull WrappedImage gradient, int x, int y) {
-        return gradient.getPixel(x, y, BorderHandling.Mirror);
+    private static double getPixel(@NotNull Matrix gradient, int x, int y) {
+        return gradient.getAt(x, y, BorderHandling.Mirror);
     }
 
-    private static Angle[][] getGradientDirection(@NotNull WrappedImage xImage, WrappedImage yImage) {
+    private static Angle[][] getGradientDirection(@NotNull Matrix xImage, Matrix yImage) {
         int width = xImage.getWidth();
         int height = xImage.getHeight();
         Angle[][] gradientDirection = new Angle[width][height];
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                gradientDirection[i][j] = Angle.of(Math.atan2(yImage.getPixel(i, j), xImage.getPixel(i, j)));
+                gradientDirection[i][j] = Angle.of(Math.atan2(yImage.getAt(i, j), xImage.getAt(i, j)));
             }
         }
         return gradientDirection;

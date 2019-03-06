@@ -39,6 +39,7 @@ public class Main {
                 break;
             case Gauss:
                 new Gauss().process(path, restArgs);
+                break;
             case Pyramid:
                 new PyramidAlgo().process(path, restArgs);
                 break;

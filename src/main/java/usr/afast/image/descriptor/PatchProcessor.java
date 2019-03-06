@@ -3,7 +3,7 @@ package usr.afast.image.descriptor;
 import org.jetbrains.annotations.NotNull;
 import usr.afast.image.enums.BorderHandling;
 import usr.afast.image.points.InterestingPoint;
-import usr.afast.image.wrapped.WrappedImage;
+import usr.afast.image.wrapped.Matrix;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,13 +17,13 @@ import static usr.afast.image.points.PointsFilter.filterPoints;
 public class PatchProcessor {
     private static final int POINTS = 30;
 
-    public static List<PointsPair> processWithPatches(WrappedImage imageA, WrappedImage imageB, final int gridHalfSize,
+    public static List<PointsPair> processWithPatches(Matrix imageA, Matrix imageB, final int gridHalfSize,
                                                       final int cellHalfSize) {
-        WrappedImage gradientA = getGradient(imageA);
-        WrappedImage gradientB = getGradient(imageB);
+        Matrix gradientA = getGradient(imageA);
+        Matrix gradientB = getGradient(imageB);
 
-        gradientA.normalize();
-        gradientB.normalize();
+        gradientA = Matrix.normalize(gradientA);
+        gradientB = Matrix.normalize(gradientB);
 
         List<InterestingPoint> pointsA = filterPoints(makeHarris(imageA), POINTS);
         List<InterestingPoint> pointsB = filterPoints(makeHarris(imageB), POINTS);
@@ -34,7 +34,7 @@ public class PatchProcessor {
         return match(descriptorsA, descriptorsB);
     }
 
-    private static List<PatchDescriptor> getDescriptors(WrappedImage gradient,
+    private static List<PatchDescriptor> getDescriptors(Matrix gradient,
                                                         @NotNull List<InterestingPoint> interestingPoints,
                                                         final int gridHalfSize,
                                                         final int cellHalfSize) {
@@ -49,9 +49,9 @@ public class PatchProcessor {
         return patchDescriptors;
     }
 
-    private static WrappedImage getGradient(WrappedImage image) {
-        WrappedImage x = getSobelX(image, BorderHandling.Mirror);
-        WrappedImage y = getSobelY(image, BorderHandling.Mirror);
-        return WrappedImage.getGradient(x, y);
+    private static Matrix getGradient(Matrix image) {
+        Matrix x = getSobelX(image, BorderHandling.Mirror);
+        Matrix y = getSobelY(image, BorderHandling.Mirror);
+        return Matrix.getGradient(x, y);
     }
 }

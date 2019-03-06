@@ -3,61 +3,60 @@ package usr.afast.image.algo;
 import usr.afast.image.enums.BorderHandling;
 import usr.afast.image.math.ConvolutionMatrixFactory;
 import usr.afast.image.math.ImageMatrixProcessor;
-import usr.afast.image.wrapped.WrappedImage;
+import usr.afast.image.wrapped.Matrix;
 
 public class AlgoLib {
-    public static WrappedImage makeGauss(WrappedImage wrappedImage, double sigma, BorderHandling borderHandling) {
-        return ImageMatrixProcessor.processWithConvolution(wrappedImage,
-                                                           ConvolutionMatrixFactory.getGaussMatrix(sigma),
-                                                           borderHandling);
+    public static Matrix makeGauss(Matrix matrix, double sigma, BorderHandling borderHandling) {
+        return ImageMatrixProcessor.processWithConvolution(matrix,
+                                                           borderHandling,
+                                                           ConvolutionMatrixFactory.getGaussMatrices(sigma));
     }
 
-    public static WrappedImage makeGauss(WrappedImage wrappedImage, int halfSize, BorderHandling borderHandling) {
-        return ImageMatrixProcessor.processWithConvolution(wrappedImage,
-                                                           ConvolutionMatrixFactory.getGaussMatrix(halfSize),
-                                                           borderHandling);
+    public static Matrix makeGauss(Matrix matrix, int halfSize, BorderHandling borderHandling) {
+        return ImageMatrixProcessor.processWithConvolution(matrix,
+                                                           borderHandling,
+                                                           ConvolutionMatrixFactory.getGaussMatrices(halfSize));
     }
 
-    public static WrappedImage makeGauss(WrappedImage wrappedImage, int halfSize, double sigma,
-                                         BorderHandling borderHandling) {
-        return ImageMatrixProcessor.processWithConvolution(wrappedImage,
-                                                           ConvolutionMatrixFactory.getGaussMatrix(halfSize, sigma),
-                                                           borderHandling);
+    public static Matrix makeGauss(Matrix matrix, int halfSize, double sigma, BorderHandling borderHandling) {
+        return ImageMatrixProcessor.processWithConvolution(matrix,
+                                                           borderHandling,
+                                                           ConvolutionMatrixFactory.getGaussMatrices(halfSize, sigma));
     }
 
-    public static WrappedImage getSobelX(WrappedImage wrappedImage, BorderHandling borderHandling) {
-        return ImageMatrixProcessor.processWithConvolution(wrappedImage,
-                                                           ConvolutionMatrixFactory.getSobelXMatrix(),
-                                                           borderHandling);
+    public static Matrix getSobelX(Matrix matrix, BorderHandling borderHandling) {
+        return ImageMatrixProcessor.processWithConvolution(matrix,
+                                                           borderHandling,
+                                                           ConvolutionMatrixFactory.getSobelXMatrices());
     }
 
-    public static WrappedImage getSobelY(WrappedImage wrappedImage, BorderHandling borderHandling) {
-        return ImageMatrixProcessor.processWithConvolution(wrappedImage,
-                                                           ConvolutionMatrixFactory.getSobelYMatrix(),
-                                                           borderHandling);
+    public static Matrix getSobelY(Matrix matrix, BorderHandling borderHandling) {
+        return ImageMatrixProcessor.processWithConvolution(matrix,
+                                                           borderHandling,
+                                                           ConvolutionMatrixFactory.getSobelYMatrices());
     }
 
-    public static WrappedImage getScharrX(WrappedImage wrappedImage, BorderHandling borderHandling) {
-        return ImageMatrixProcessor.processWithConvolution(wrappedImage,
-                                                           ConvolutionMatrixFactory.getScharrXMatrix(),
-                                                           borderHandling);
+    public static Matrix getScharrX(Matrix matrix, BorderHandling borderHandling) {
+        return ImageMatrixProcessor.processWithConvolution(matrix,
+                                                           borderHandling,
+                                                           ConvolutionMatrixFactory.getScharrXMatrices());
     }
 
-    public static WrappedImage getScharrY(WrappedImage wrappedImage, BorderHandling borderHandling) {
-        return ImageMatrixProcessor.processWithConvolution(wrappedImage,
-                                                           ConvolutionMatrixFactory.getScharrYMatrix(),
-                                                           borderHandling);
+    public static Matrix getScharrY(Matrix matrix, BorderHandling borderHandling) {
+        return ImageMatrixProcessor.processWithConvolution(matrix,
+                                                           borderHandling,
+                                                           ConvolutionMatrixFactory.getScharrYMatrices());
     }
 
-    public static WrappedImage getPruittX(WrappedImage wrappedImage, BorderHandling borderHandling) {
-        return ImageMatrixProcessor.processWithConvolution(wrappedImage,
-                                                           ConvolutionMatrixFactory.getPruittXMatrix(),
-                                                           borderHandling);
+    public static Matrix getPruittX(Matrix matrix, BorderHandling borderHandling) {
+        return ImageMatrixProcessor.processWithConvolution(matrix,
+                                                           borderHandling,
+                                                           ConvolutionMatrixFactory.getPruittXMatrices());
     }
 
-    public static WrappedImage getPruittY(WrappedImage wrappedImage, BorderHandling borderHandling) {
-        return ImageMatrixProcessor.processWithConvolution(wrappedImage,
-                                                           ConvolutionMatrixFactory.getPruittYMatrix(),
-                                                           borderHandling);
+    public static Matrix getPruittY(Matrix matrix, BorderHandling borderHandling) {
+        return ImageMatrixProcessor.processWithConvolution(matrix,
+                                                           borderHandling,
+                                                           ConvolutionMatrixFactory.getPruittYMatrices());
     }
 }

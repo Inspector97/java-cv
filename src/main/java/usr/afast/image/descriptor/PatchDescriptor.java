@@ -4,14 +4,14 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import usr.afast.image.enums.BorderHandling;
 import usr.afast.image.points.InterestingPoint;
-import usr.afast.image.wrapped.WrappedImage;
+import usr.afast.image.wrapped.Matrix;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PatchDescriptor extends AbstractDescriptor {
     private double[] descriptor;
     private InterestingPoint point;
 
-    public static PatchDescriptor at(WrappedImage gradient, final InterestingPoint point, final int gridHalfSize,
+    public static PatchDescriptor at(Matrix gradient, final InterestingPoint point, final int gridHalfSize,
                                      final int cellHalfSize) {
         PatchDescriptor patchDescriptor = new PatchDescriptor();
         patchDescriptor.point = point;
@@ -31,7 +31,7 @@ public class PatchDescriptor extends AbstractDescriptor {
                         int realX = point.getX() + cellX * cellSize + pixelX;
                         int realY = point.getY() + cellY * cellSize + pixelY;
 
-                        sum += gradient.getPixel(realX, realY, BorderHandling.Mirror);
+                        sum += gradient.getAt(realX, realY, BorderHandling.Mirror);
                     }
                 }
 

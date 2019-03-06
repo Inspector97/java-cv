@@ -16,7 +16,7 @@ import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 @SuppressWarnings("Duplicates")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class WrappedImage {
+public class Matrix {
     private static final double BLACK = 0;
     private static final double WHITE = 1;
     private int width;
@@ -25,47 +25,47 @@ public class WrappedImage {
     @Getter(AccessLevel.NONE)
     private double[] buffer;
 
-    public static WrappedImage of(@NotNull BufferedImage image) {
-        WrappedImage wrappedImage = new WrappedImage();
-        wrappedImage.width = image.getWidth();
-        wrappedImage.height = image.getHeight();
-        wrappedImage.buffer = new double[wrappedImage.width * wrappedImage.height];
+    public static Matrix of(@NotNull BufferedImage image) {
+        Matrix matrix = new Matrix();
+        matrix.width = image.getWidth();
+        matrix.height = image.getHeight();
+        matrix.buffer = new double[matrix.width * matrix.height];
 
         for (int x = 0; x < image.getWidth(); x++) {
             for (int y = 0; y < image.getHeight(); y++) {
                 Color color = new Color(image.getRGB(x, y));
                 double gray = 0.2126 * color.getRed() + 0.7152 * color.getGreen() + 0.0722 * color.getBlue();
-                wrappedImage.setPixel(x, y, gray / 255);
+                matrix.setAt(x, y, gray / 255);
             }
         }
-        return wrappedImage;
+        return matrix;
     }
 
-    public static WrappedImage of(@NotNull double[][] buffer) {
-        WrappedImage wrappedImage = new WrappedImage();
-        wrappedImage.width = buffer.length;
+    public static Matrix of(@NotNull double[][] buffer) {
+        Matrix matrix = new Matrix();
+        matrix.height = buffer.length;
         if (buffer.length > 0) {
-            wrappedImage.height = buffer[0].length;
+            matrix.width = buffer[0].length;
         } else {
-            wrappedImage.height = 0;
+            matrix.width = 0;
         }
-        wrappedImage.buffer = new double[wrappedImage.width * wrappedImage.height];
-        for (int i = 0; i < wrappedImage.width; i++) {
-            for (int j = 0; j < wrappedImage.height; j++) {
-                wrappedImage.setPixel(i, j, buffer[i][j]);
+        matrix.buffer = new double[matrix.width * matrix.height];
+        for (int i = 0; i < matrix.width; i++) {
+            for (int j = 0; j < matrix.height; j++) {
+                matrix.setAt(i, j, buffer[j][i]);
             }
         }
-        return wrappedImage;
+        return matrix;
     }
 
-    public WrappedImage(@NotNull WrappedImage wrappedImage) {
-        width = wrappedImage.width;
-        height = wrappedImage.height;
+    public Matrix(@NotNull Matrix matrix) {
+        width = matrix.width;
+        height = matrix.height;
         buffer = new double[width * height];
-        System.arraycopy(wrappedImage.buffer, 0, buffer, 0, buffer.length);
+        System.arraycopy(matrix.buffer, 0, buffer, 0, buffer.length);
     }
 
-    public WrappedImage(int width, int height) {
+    public Matrix(int width, int height) {
         if (width < 0 || height < 0)
             throw new IllegalArgumentException("Размер не может быть отрицательным");
         this.width = width;
@@ -73,13 +73,12 @@ public class WrappedImage {
         this.buffer = new double[width * height];
     }
 
-    public static BufferedImage save(WrappedImage wrappedImage) {
-        WrappedImage copied = new WrappedImage(wrappedImage);
-        copied.normalize();
+    public static BufferedImage save(Matrix matrix) {
+        Matrix copied = normalize(matrix);
         BufferedImage image = new BufferedImage(copied.width, copied.height, TYPE_INT_RGB);
         for (int x = 0; x < copied.width; x++) {
             for (int y = 0; y < copied.height; y++) {
-                int gray = (int) Math.round(copied.getPixel(x, y) * 255);
+                int gray = (int) Math.round(copied.getAt(x, y) * 255);
                 Color color = new Color(gray, gray, gray);
                 image.setRGB(x, y, color.getRGB());
             }
@@ -87,39 +86,50 @@ public class WrappedImage {
         return image;
     }
 
-    public void setPixel(int x, int y, double value) {
+    @SuppressWarnings("SuspiciousNameCombination")
+    public static Matrix transform(Matrix matrix) {
+        Matrix transformed = new Matrix(matrix.height, matrix.width);
+        for (int x = 0; x < matrix.width; x++) {
+            for (int y = 0; y < matrix.height; y++) {
+                transformed.setAt(y, x, matrix.getAt(x, y));
+            }
+        }
+        return transformed;
+    }
+
+    public void setAt(int x, int y, double value) {
         buffer[getPosition(x, y)] = value;
     }
 
-    public double getPixel(int x, int y) {
+    public double getAt(int x, int y) {
         return buffer[getPosition(x, y)];
     }
 
 
-    public double getPixel(int x, int y, @NotNull BorderHandling borderHandling) {
+    public double getAt(int x, int y, @NotNull BorderHandling borderHandling) {
         switch (borderHandling) {
             case Black:
                 if (x < 0 || x >= getWidth() || y < 0 || y >= getHeight())
                     return BLACK;
-                return getPixel(x, y);
+                return getAt(x, y);
             case White:
                 if (x < 0 || x >= getWidth() || y < 0 || y >= getHeight())
                     return WHITE;
-                return getPixel(x, y);
+                return getAt(x, y);
             case Copy:
                 x = border(x, 0, getWidth() - 1);
                 y = border(y, 0, getHeight() - 1);
-                return getPixel(x, y);
+                return getAt(x, y);
             case Wrap:
                 x = (x + getWidth()) % getWidth();
                 y = (y + getHeight()) % getHeight();
-                return getPixel(x, y);
+                return getAt(x, y);
             case Mirror:
                 x = Math.abs(x);
                 y = Math.abs(y);
                 if (x >= getWidth()) x = getWidth() - (x - getWidth() + 1);
                 if (y >= getHeight()) y = getHeight() - (y - getHeight() + 1);
-                return getPixel(x, y);
+                return getAt(x, y);
             default:
                 return BLACK;
         }
@@ -137,10 +147,10 @@ public class WrappedImage {
         }
     }
 
-    public static WrappedImage getGradient(@NotNull WrappedImage xImage, @NotNull WrappedImage yImage) {
+    public static Matrix getGradient(@NotNull Matrix xImage, @NotNull Matrix yImage) {
         if (xImage.height != yImage.height || xImage.width != yImage.width)
             throw new IllegalArgumentException("Изображения разного размера");
-        WrappedImage gradient = new WrappedImage(xImage.width, xImage.height);
+        Matrix gradient = new Matrix(xImage.width, xImage.height);
 
         for (int i = 0; i < gradient.buffer.length; i++) {
             gradient.buffer[i] = Math.sqrt(sqr(xImage.buffer[i]) + sqr(yImage.buffer[i]));
@@ -149,10 +159,10 @@ public class WrappedImage {
         return gradient;
     }
 
-    public static WrappedImage getGradientAngle(@NotNull WrappedImage xImage, @NotNull WrappedImage yImage) {
+    public static Matrix getGradientAngle(@NotNull Matrix xImage, @NotNull Matrix yImage) {
         if (xImage.height != yImage.height || xImage.width != yImage.width)
             throw new IllegalArgumentException("Изображения разного размера");
-        WrappedImage gradientAngle = new WrappedImage(xImage.width, xImage.height);
+        Matrix gradientAngle = new Matrix(xImage.width, xImage.height);
 
         for (int i = 0; i < gradientAngle.buffer.length; i++) {
             gradientAngle.buffer[i] = Math.atan2(yImage.buffer[i], xImage.buffer[i]);
@@ -166,17 +176,19 @@ public class WrappedImage {
         return value * value;
     }
 
-    public void normalize() {
+    public static Matrix normalize(Matrix matrix) {
+        Matrix copied = new Matrix(matrix);
         double maxIntensity = 0, minIntensity = 1;
         double resultMaxIntensity = 1, resultMinIntensity = 0;
-        for (double value : buffer) {
+        for (double value : copied.buffer) {
             maxIntensity = Math.max(maxIntensity, value);
             minIntensity = Math.min(minIntensity, value);
         }
         double coef = (resultMaxIntensity - resultMinIntensity) / (maxIntensity - minIntensity);
-        for (int i = 0; i < buffer.length; i++) {
-            buffer[i] = (buffer[i] - minIntensity) * coef + resultMinIntensity;
+        for (int i = 0; i < copied.buffer.length; i++) {
+            copied.buffer[i] = (copied.buffer[i] - minIntensity) * coef + resultMinIntensity;
         }
+        return copied;
     }
 
     @Contract(pure = true)
@@ -186,13 +198,13 @@ public class WrappedImage {
         return x * height + y;
     }
 
-    public WrappedImage downSample() {
+    public Matrix downSample() {
         int newWidth = width / 2;
         int newHeight = height / 2;
-        WrappedImage result = new WrappedImage(newWidth, newHeight);
+        Matrix result = new Matrix(newWidth, newHeight);
         for (int i = 0; i < newWidth; i++) {
             for (int j = 0; j < newHeight; j++) {
-                result.setPixel(i, j, getPixel(i * 2, j * 2));
+                result.setAt(i, j, getAt(i * 2, j * 2));
             }
         }
         return result;

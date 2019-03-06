@@ -4,7 +4,7 @@ import lombok.Getter;
 import org.apache.commons.io.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import usr.afast.image.enums.BorderHandling;
-import usr.afast.image.wrapped.WrappedImage;
+import usr.afast.image.wrapped.Matrix;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -25,11 +25,11 @@ public class Pyramid {
     private double initSigma;
     private double startSigma;
     private int octaveSize;
-    private WrappedImage original;
+    private Matrix original;
     private List<Octave> octaves;
     private Octave minusFirstOctave;
 
-    public static Pyramid build(WrappedImage image, double initSigma, double startSigma, int octaveSize) {
+    public static Pyramid build(Matrix image, double initSigma, double startSigma, int octaveSize) {
         Pyramid pyramid = new Pyramid();
         pyramid.original = image;
         pyramid.initSigma = initSigma;
@@ -38,7 +38,7 @@ public class Pyramid {
         pyramid.octaves = new LinkedList<>();
         pyramid.depth = 0;
 
-        WrappedImage current = makeFirstImage(image, initSigma, startSigma);
+        Matrix current = makeFirstImage(image, initSigma, startSigma);
 
         pyramid.minusFirstOctave = Octave.build(makeFirstImage(upscale(image), initSigma, startSigma),
                                                 -1,
@@ -55,10 +55,10 @@ public class Pyramid {
         return pyramid;
     }
 
-    private static WrappedImage makeFirstImage(WrappedImage original, double initSigma, double startSigma) {
+    private static Matrix makeFirstImage(Matrix original, double initSigma, double startSigma) {
         double delta = Math.sqrt(startSigma * startSigma - initSigma * initSigma);
         if (Math.abs(delta) < 1e-3)
-            return new WrappedImage(original);
+            return new Matrix(original);
         return makeGauss(original, delta, BorderHandling.Mirror);
     }
 
@@ -70,17 +70,17 @@ public class Pyramid {
         if (octaveIndex >= octaves.size()) {
             throw new IllegalArgumentException("Sigma too big");
         }
-        WrappedImage image = octaves.get(octaveIndex).getImages().get(index % octaveSize).getImage();
+        Matrix image = octaves.get(octaveIndex).getImages().get(index % octaveSize).getImage();
         System.out.println(image.getHeight());
         int scale = (int) Math.ceil(Math.pow(2, octaveIndex));
-        return image.getPixel((x / scale), (y / scale));
+        return image.getAt((x / scale), (y / scale));
     }
 
-    private static WrappedImage upscale(@NotNull WrappedImage image) {
-        WrappedImage upscaled = new WrappedImage(image.getWidth() * 2, image.getHeight() * 2);
+    private static Matrix upscale(@NotNull Matrix image) {
+        Matrix upscaled = new Matrix(image.getWidth() * 2, image.getHeight() * 2);
         for (int i = 0; i < image.getWidth(); i++) {
             for (int j = 0; j < image.getHeight(); j++) {
-                upscaled.setPixel(i * 2, j * 2, image.getPixel(i, j) * 4);
+                upscaled.setAt(i * 2, j * 2, image.getAt(i, j) * 4);
             }
         }
         return makeGauss(upscaled, 2, 1, BorderHandling.Mirror);
@@ -102,7 +102,7 @@ public class Pyramid {
             e.printStackTrace();
         }
         path = Paths.get(folderPath, file.getName()).toString();
-        BufferedImage current = WrappedImage.save(original);
+        BufferedImage current = Matrix.save(original);
         String currentPath = getSaveFilePath(path, "[ original ]");
         write(currentPath, current);
 
@@ -113,7 +113,7 @@ public class Pyramid {
                                               octaveLayer.getIndex(),
                                               octaveLayer.getGlobalSigma());
                 System.out.println(suffix);
-                current = WrappedImage.save(octaveLayer.getImage());
+                current = Matrix.save(octaveLayer.getImage());
                 currentPath = getSaveFilePath(path, suffix);
                 write(currentPath, current);
             }
@@ -125,7 +125,7 @@ public class Pyramid {
                                           octaveLayer.getIndex(),
                                           octaveLayer.getGlobalSigma());
             System.out.println(suffix);
-            current = WrappedImage.save(octaveLayer.getImage());
+            current = Matrix.save(octaveLayer.getImage());
             currentPath = getSaveFilePath(path, suffix);
             write(currentPath, current);
         }

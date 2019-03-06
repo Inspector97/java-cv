@@ -1,11 +1,9 @@
 package usr.afast.image.algo;
 
-import usr.afast.image.descriptor.PatchProcessor;
 import usr.afast.image.descriptor.PointsPair;
-import usr.afast.image.descriptor.SIFTDescriptor;
 import usr.afast.image.descriptor.SIFTProcessor;
 import usr.afast.image.util.Stopwatch;
-import usr.afast.image.wrapped.WrappedImage;
+import usr.afast.image.wrapped.Matrix;
 
 import java.awt.image.BufferedImage;
 import java.util.List;
@@ -17,8 +15,8 @@ import static usr.afast.image.util.StringArgsUtil.getInt;
 public class SiftAlgo implements Algorithm {
     @Override
     public void process(String path, String... args) {
-        WrappedImage imageA = WrappedImage.of(read(path));
-        WrappedImage imageB = WrappedImage.of(read(args[0]));
+        Matrix imageA = Matrix.of(read(path));
+        Matrix imageB = Matrix.of(read(args[0]));
         int gridSize = getInt(1, args);
         int cellSize = getInt(2, args);
         int binCount = getInt(3, args);

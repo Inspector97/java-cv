@@ -1,19 +1,19 @@
 package usr.afast.image.algo;
 
 import usr.afast.image.enums.BorderHandling;
-import usr.afast.image.wrapped.WrappedImage;
+import usr.afast.image.wrapped.Matrix;
 
 import static usr.afast.image.algo.AlgoLib.getSobelX;
 import static usr.afast.image.algo.AlgoLib.getSobelY;
 
 public class Sobel extends GradientProcessor {
     @Override
-    public WrappedImage getXImage(WrappedImage wrappedImage, BorderHandling borderHandling) {
-        return getSobelX(wrappedImage, borderHandling);
+    public Matrix getXImage(Matrix matrix, BorderHandling borderHandling) {
+        return getSobelX(matrix, borderHandling);
     }
 
     @Override
-    public WrappedImage getYImage(WrappedImage wrappedImage, BorderHandling borderHandling) {
-        return getSobelY(wrappedImage, borderHandling);
+    public Matrix getYImage(Matrix matrix, BorderHandling borderHandling) {
+        return getSobelY(matrix, borderHandling);
     }
 }

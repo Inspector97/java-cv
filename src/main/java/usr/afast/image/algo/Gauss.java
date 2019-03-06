@@ -2,7 +2,7 @@ package usr.afast.image.algo;
 
 import usr.afast.image.enums.BorderHandling;
 import usr.afast.image.util.Stopwatch;
-import usr.afast.image.wrapped.WrappedImage;
+import usr.afast.image.wrapped.Matrix;
 
 import java.awt.image.BufferedImage;
 
@@ -18,10 +18,10 @@ public class Gauss implements Algorithm {
         double sigma = getDouble(1, args);
         System.out.println(String.format("Gauss with sigma %.3f", sigma));
         BufferedImage image = read(path);
-        WrappedImage wrappedImage = WrappedImage.of(image);
-        write(getSaveFilePath(path, "original"), WrappedImage.save(wrappedImage));
-        WrappedImage result = Stopwatch.measure(() -> makeGauss(wrappedImage, sigma, borderHandling));
-        BufferedImage bufferedImageResult = WrappedImage.save(result);
+        Matrix matrix = Matrix.of(image);
+        write(getSaveFilePath(path, "original"), Matrix.save(matrix));
+        Matrix result = Stopwatch.measure(() -> makeGauss(matrix, sigma, borderHandling));
+        BufferedImage bufferedImageResult = Matrix.save(result);
         String newFilePath = getSaveFilePath(path, getClass().getSimpleName());
         write(newFilePath, bufferedImageResult);
     }

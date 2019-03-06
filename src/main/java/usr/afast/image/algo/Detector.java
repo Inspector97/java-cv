@@ -2,7 +2,7 @@ package usr.afast.image.algo;
 
 import usr.afast.image.points.InterestingPoint;
 import usr.afast.image.util.Stopwatch;
-import usr.afast.image.wrapped.WrappedImage;
+import usr.afast.image.wrapped.Matrix;
 
 import java.awt.image.BufferedImage;
 import java.util.List;
@@ -17,8 +17,8 @@ public abstract class Detector implements Algorithm {
     public final void process(String path, String... args) {
         int maxPoints = getInt(0, args);
         BufferedImage image = read(path);
-        WrappedImage wrappedImage = WrappedImage.of(image);
-        List<InterestingPoint> interestingPoints = Stopwatch.measure(() -> makeAlgorithm(wrappedImage));
+        Matrix matrix = Matrix.of(image);
+        List<InterestingPoint> interestingPoints = Stopwatch.measure(() -> makeAlgorithm(matrix));
         System.out.println("Points: " + interestingPoints.size());
 
 //        System.out.println("Filtering simple");
@@ -29,9 +29,9 @@ public abstract class Detector implements Algorithm {
         List<InterestingPoint> filtered2 = Stopwatch.measure(() -> filterPoints(interestingPoints, maxPoints));
         System.out.println("Filtered fast points: " + filtered2.size());
 
-        BufferedImage resultAll = markPoints(interestingPoints, wrappedImage);
-//        BufferedImage resultFiltered = markPoints(filtered, wrappedImage);
-        BufferedImage resultFiltered2 = markPoints(filtered2, wrappedImage);
+        BufferedImage resultAll = markPoints(interestingPoints, matrix);
+//        BufferedImage resultFiltered = markPoints(filtered, matrix);
+        BufferedImage resultFiltered2 = markPoints(filtered2, matrix);
 
         String newFilePathAll = getSaveFilePath(path, getClass().getSimpleName()+"_ALL");
         write(newFilePathAll, resultAll);
@@ -41,5 +41,5 @@ public abstract class Detector implements Algorithm {
         write(newFilePathFiltered2, resultFiltered2);
     }
 
-    public abstract List<InterestingPoint> makeAlgorithm(WrappedImage wrappedImage);
+    public abstract List<InterestingPoint> makeAlgorithm(Matrix matrix);
 }

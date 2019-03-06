@@ -4,20 +4,20 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import usr.afast.image.enums.BorderHandling;
 import usr.afast.image.math.AngleBin;
-import usr.afast.image.math.ConvolutionMatrix;
-import usr.afast.image.math.ConvolutionMatrixFactory;
 import usr.afast.image.points.InterestingPoint;
-import usr.afast.image.wrapped.WrappedImage;
+import usr.afast.image.util.SeparableMatrix;
+import usr.afast.image.wrapped.Matrix;
 
-import java.util.Arrays;
+import static usr.afast.image.math.ConvolutionMatrixFactory.getGaussMatrices;
+import static usr.afast.image.math.ConvolutionMatrixFactory.separableMatrixFrom;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class SIFTDescriptor extends AbstractDescriptor {
     private double[] descriptor;
     private InterestingPoint point;
 
-    public static SIFTDescriptor at(WrappedImage gradient,
-                                    WrappedImage gradientAngle,
+    public static SIFTDescriptor at(Matrix gradient,
+                                    Matrix gradientAngle,
                                     final InterestingPoint point,
                                     final int gridSize,
                                     final int cellSize,
@@ -28,7 +28,7 @@ public class SIFTDescriptor extends AbstractDescriptor {
 
         int gridHalfSize = gridSize / 2;
 
-        ConvolutionMatrix gauss = ConvolutionMatrixFactory.getGaussMatrix(gridHalfSize * cellSize);
+        SeparableMatrix gauss = separableMatrixFrom(getGaussMatrices(gridHalfSize * cellSize));
 
         int ptr = 0;
         int centerShift = gridHalfSize * cellSize;
@@ -43,10 +43,10 @@ public class SIFTDescriptor extends AbstractDescriptor {
                         int realX = point.getX() + cellX * cellSize + pixelX;
                         int realY = point.getY() + cellY * cellSize + pixelY;
 
-                        double phi = gradientAngle.getPixel(realX, realY, BorderHandling.Mirror);
-                        double gradientValue = gradient.getPixel(realX, realY, BorderHandling.Mirror);
-                        double gaussValue = gauss.get(centerShift + cellX * cellSize + pixelX,
-                                                      centerShift + cellY * cellSize + pixelY);
+                        double phi = gradientAngle.getAt(realX, realY, BorderHandling.Mirror);
+                        double gradientValue = gradient.getAt(realX, realY, BorderHandling.Mirror);
+                        double gaussValue = gauss.getAt(centerShift + cellX * cellSize + pixelX,
+                                                        centerShift + cellY * cellSize + pixelY);
 
                         bin.addAngle(phi, gradientValue * gaussValue);
                     }

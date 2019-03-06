@@ -2,7 +2,7 @@ package usr.afast.image.util;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import usr.afast.image.wrapped.WrappedImage;
+import usr.afast.image.wrapped.Matrix;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -22,8 +22,8 @@ public class ImageIO {
         return image;
     }
 
-    public static boolean write(String path, WrappedImage image) {
-        return write(path, WrappedImage.save(image));
+    public static boolean write(String path, Matrix image) {
+        return write(path, Matrix.save(image));
     }
 
     public static boolean write(String path, BufferedImage image) {

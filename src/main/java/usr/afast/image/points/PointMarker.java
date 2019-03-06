@@ -2,7 +2,7 @@ package usr.afast.image.points;
 
 import org.jetbrains.annotations.NotNull;
 import usr.afast.image.descriptor.PointsPair;
-import usr.afast.image.wrapped.WrappedImage;
+import usr.afast.image.wrapped.Matrix;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -11,8 +11,8 @@ import java.util.List;
 public class PointMarker {
     private static final double SPECTRUM_OFFSET = 180D / 255;
 
-    public static BufferedImage markPoints(@NotNull List<InterestingPoint> interestingPoints, WrappedImage image) {
-        BufferedImage bufferedImage = WrappedImage.save(image);
+    public static BufferedImage markPoints(@NotNull List<InterestingPoint> interestingPoints, Matrix image) {
+        BufferedImage bufferedImage = Matrix.save(image);
 
         Graphics2D graphics = bufferedImage.createGraphics();
         int radius = 2;
@@ -28,9 +28,9 @@ public class PointMarker {
         return bufferedImage;
     }
 
-    public static BufferedImage markMatching(WrappedImage imageA, WrappedImage imageB, List<PointsPair> matching) {
-        BufferedImage bufferedA = WrappedImage.save(imageA);
-        BufferedImage bufferedB = WrappedImage.save(imageB);
+    public static BufferedImage markMatching(Matrix imageA, Matrix imageB, List<PointsPair> matching) {
+        BufferedImage bufferedA = Matrix.save(imageA);
+        BufferedImage bufferedB = Matrix.save(imageB);
         BufferedImage result = new BufferedImage(bufferedA.getWidth() + bufferedB.getWidth(),
                                                  Math.max(bufferedA.getHeight(), bufferedB.getHeight()),
                                                  BufferedImage.TYPE_INT_ARGB);

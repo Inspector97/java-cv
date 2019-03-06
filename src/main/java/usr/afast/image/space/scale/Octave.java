@@ -2,7 +2,7 @@ package usr.afast.image.space.scale;
 
 import lombok.Getter;
 import usr.afast.image.enums.BorderHandling;
-import usr.afast.image.wrapped.WrappedImage;
+import usr.afast.image.wrapped.Matrix;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,9 +14,9 @@ public class Octave {
     private int number;
     private double startSigma;
     private List<OctaveLayer> images;
-    private WrappedImage nextImage;
+    private Matrix nextImage;
 
-    public static Octave build(WrappedImage image, int number, double startSigma, int size) {
+    public static Octave build(Matrix image, int number, double startSigma, int size) {
         Octave octave = new Octave();
         octave.images = new ArrayList<>(size + 1);
         octave.startSigma = startSigma;
@@ -26,7 +26,7 @@ public class Octave {
         double localSigma = startSigma;
         double globalSigma = startSigma * Math.pow(2, number);
 
-        WrappedImage current = new WrappedImage(image);
+        Matrix current = new Matrix(image);
         octave.images.add(new OctaveLayer(0, localSigma, globalSigma, current));
         for (int i = 0; i < size; i++) {
             double nextSigma = localSigma * step;
