@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import static usr.afast.image.algo.AlgoLib.*;
 import static usr.afast.image.math.ConvolutionMatrixFactory.getGaussMatrix;
 import static usr.afast.image.util.DetectorUtil.getCandidates;
+import static usr.afast.image.util.ImageIO.write;
 import static usr.afast.image.util.Math.sqr;
 
 @SuppressWarnings("Duplicates")
@@ -34,7 +35,7 @@ public class Harris {
             for (int j = 0; j < height; j++)
                 temp.setPixel(i, j, harris[i][j]);
 
-//        write(TEMP_PATH, temp);
+        write(TEMP_PATH, temp);
 
         List<InterestingPoint> candidates = getCandidates(harris, width, height);
 
