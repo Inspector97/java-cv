@@ -2,6 +2,7 @@ package usr.afast.image.descriptor;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import usr.afast.image.enums.BorderHandling;
 import usr.afast.image.math.AngleBin;
 import usr.afast.image.points.InterestingPoint;
@@ -26,38 +27,87 @@ public class SIFTDescriptor extends AbstractDescriptor {
         siftDescriptor.point = point;
         siftDescriptor.descriptor = new double[gridSize * gridSize * binsCount];
 
-        int gridHalfSize = gridSize / 2;
+        AngleBin[][] bins = new AngleBin[gridSize][gridSize];
+        for (int i = 0; i < gridSize; i++)
+            for (int j = 0; j < gridSize; j++)
+                bins[i][j] = new AngleBin(binsCount);
 
-        SeparableMatrix gauss = separableMatrixFrom(getGaussMatrices(gridHalfSize * cellSize));
+        double mainAngle = getMainAngle(gradient, gradientAngle, point, gridSize, cellSize);
 
+        int border = gridSize * cellSize;
+        int halfBorder = border / 2;
+
+        SeparableMatrix gauss = separableMatrixFrom(getGaussMatrices(halfBorder));
+        int left = -halfBorder, right = border - halfBorder;
+
+        for (int x = left; x < right; x++) {
+            for (int y = left; y < right; y++) {
+                int rotatedX = rotateX(x, y, mainAngle);
+                int rotatedY = rotateY(x, y, mainAngle);
+
+                if (rotatedX < left || rotatedX >= right || rotatedY < left || rotatedY >= right) continue;
+
+                int realX = point.getX() + rotatedX;
+                int realY = point.getY() + rotatedY;
+                double phi = gradientAngle.getAt(realX, realY, BorderHandling.Mirror);
+                double gradientValue = gradient.getAt(realX, realY, BorderHandling.Mirror);
+                double gaussValue = gauss.getAt(halfBorder + rotatedX, halfBorder + rotatedY);
+
+                putToBin(bins, rotatedX, rotatedY, left, cellSize, phi - mainAngle, gradientValue * gaussValue);
+            }
+        }
         int ptr = 0;
-        int centerShift = gridHalfSize * cellSize;
-
-        for (int cellX = -gridHalfSize; cellX < gridSize - gridHalfSize; cellX++) {
-            for (int cellY = -gridHalfSize; cellY < gridSize - gridHalfSize; cellY++) {
-
-                AngleBin bin = new AngleBin(binsCount);
-
-                for (int pixelX = 0; pixelX < cellSize; pixelX++) {
-                    for (int pixelY = 0; pixelY < cellSize; pixelY++) {
-                        int realX = point.getX() + cellX * cellSize + pixelX;
-                        int realY = point.getY() + cellY * cellSize + pixelY;
-
-                        double phi = gradientAngle.getAt(realX, realY, BorderHandling.Mirror);
-                        double gradientValue = gradient.getAt(realX, realY, BorderHandling.Mirror);
-                        double gaussValue = gauss.getAt(centerShift + cellX * cellSize + pixelX,
-                                                        centerShift + cellY * cellSize + pixelY);
-
-                        bin.addAngle(phi, gradientValue * gaussValue);
-                    }
-                }
-
-                System.arraycopy(bin.getBin(), 0, siftDescriptor.descriptor, ptr, binsCount);
+        for (int i = 0; i < gridSize; i++) {
+            for (int j = 0; j < gridSize; j++) {
+                System.arraycopy(bins[i][j].getBin(), 0, siftDescriptor.descriptor, ptr, binsCount);
                 ptr += binsCount;
             }
         }
 
         return siftDescriptor;
+    }
+
+    private static void putToBin(@NotNull AngleBin[][] bins, int realX, int realY, int left, int cellSize,
+                                 double angle, double value) {
+        int x = (realX - left) / cellSize;
+        int y = (realY - left) / cellSize;
+        bins[x][y].addAngle(angle, value);
+    }
+
+    private static int rotateX(int x, int y, double angle) {
+        return (int) (x * Math.cos(angle) + y * Math.sin(angle));
+    }
+
+    private static int rotateY(int x, int y, double angle) {
+        return (int) (y * Math.cos(angle) - x * Math.sin(angle));
+    }
+
+    private static double getMainAngle(Matrix gradient,
+                                       Matrix gradientAngle,
+                                       final InterestingPoint point,
+                                       final int gridSize,
+                                       final int cellSize) {
+        final int binSize = 36;
+        AngleBin bin = new AngleBin(binSize);
+
+        int border = gridSize * cellSize;
+        int halfBorder = border / 2;
+
+        SeparableMatrix gauss = separableMatrixFrom(getGaussMatrices(halfBorder));
+
+        for (int x = -halfBorder; x < border - halfBorder; x++) {
+            for (int y = -halfBorder; y < border - halfBorder; y++) {
+                int realX = point.getX() + x;
+                int realY = point.getY() + y;
+                double phi = gradientAngle.getAt(realX, realY, BorderHandling.Mirror);
+                double gradientValue = gradient.getAt(realX, realY, BorderHandling.Mirror);
+                double gaussValue = gauss.getAt(halfBorder + x, halfBorder + y);
+
+                bin.addAngle(phi, gradientValue * gaussValue);
+            }
+        }
+
+        return bin.getPeek();
     }
 
     @Override

@@ -1,6 +1,8 @@
 package usr.afast.image.math;
 
 import lombok.Getter;
+import org.jetbrains.annotations.Contract;
+import usr.afast.image.wrapped.Matrix;
 
 @Getter
 public class AngleBin {
@@ -16,8 +18,7 @@ public class AngleBin {
     }
 
     public void addAngle(double angle, double value) {
-        if (angle < 0) angle += Math.PI;
-        if (angle >= Math.PI) angle -= Math.PI;
+        angle = normalize(angle);
 
         angle /= step;
         int binIdx = (int) angle;
@@ -30,5 +31,26 @@ public class AngleBin {
 
         bin[binIdx] += weight * value;
         bin[neighbourIdx] += (1 - weight) * value;
+    }
+
+    @Contract(pure = true)
+    private double normalize(double angle) {
+        while (angle < 0)
+            angle += Math.PI;
+        while (angle >= Math.PI)
+            angle -= Math.PI;
+        return angle;
+    }
+
+    public double getPeek() {
+        double max = Double.MIN_VALUE;
+        double angle = -1;
+        for (int i = 0; i < size; i++) {
+            if (max < bin[i]) {
+                max = bin[i];
+                angle = (i + 0.5) * step;
+            }
+        }
+        return angle;
     }
 }

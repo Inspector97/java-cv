@@ -31,7 +31,7 @@ public class Harris {
 
         Matrix harris = getHarrisMat(image, width, height);
 
-        write(TEMP_PATH, harris);
+//        write(TEMP_PATH, harris);
 
         List<InterestingPoint> candidates = getCandidates(harris, width, height);
 

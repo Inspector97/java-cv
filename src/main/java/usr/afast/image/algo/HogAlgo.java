@@ -1,6 +1,10 @@
 package usr.afast.image.algo;
 
-import usr.afast.image.descriptor.*;
+import usr.afast.image.descriptor.GistogramBasedDescriptor;
+import usr.afast.image.descriptor.HOGDescriptor;
+import usr.afast.image.descriptor.PointsPair;
+import usr.afast.image.descriptor.HOGProcessor;
+import usr.afast.image.points.InterestingPoint;
 import usr.afast.image.util.Stopwatch;
 import usr.afast.image.wrapped.Matrix;
 
@@ -11,7 +15,7 @@ import static usr.afast.image.points.PointMarker.markMatching;
 import static usr.afast.image.util.ImageIO.*;
 import static usr.afast.image.util.StringArgsUtil.getInt;
 
-public class SiftAlgo implements Algorithm {
+public class HogAlgo implements Algorithm {
     @Override
     public void process(String path, String... args) {
         Matrix imageA = Matrix.of(read(path));
@@ -20,16 +24,16 @@ public class SiftAlgo implements Algorithm {
         int cellSize = getInt(2, args);
         int binCount = getInt(3, args);
         GistogramBasedDescriptor descriptor = (gradient, gradientAngle, interestingPoint) ->
-                SIFTDescriptor.at(gradient,
-                                  gradientAngle,
-                                  interestingPoint,
-                                  gridSize,
-                                  cellSize,
-                                  binCount);
+                HOGDescriptor.at(gradient,
+                                 gradientAngle,
+                                 interestingPoint,
+                                 gridSize,
+                                 cellSize,
+                                 binCount);
         List<PointsPair> matching = Stopwatch.measure(() -> HOGProcessor.process(imageA, imageB, descriptor));
 
         BufferedImage result = markMatching(imageA, imageB, matching);
-        write(getSaveFilePath(path, "SIFT_MATCHING"), result);
+        write(getSaveFilePath(path, "HOG_MATCHING"), result);
 
         System.out.println("Matched " + matching.size());
     }
