@@ -9,6 +9,11 @@ import usr.afast.image.points.InterestingPoint;
 import usr.afast.image.util.SeparableMatrix;
 import usr.afast.image.wrapped.Matrix;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+
 import static usr.afast.image.math.ConvolutionMatrixFactory.getGaussMatrices;
 import static usr.afast.image.math.ConvolutionMatrixFactory.separableMatrixFrom;
 
@@ -18,54 +23,59 @@ public class SIFTDescriptor extends AbstractDescriptor {
     private double[] descriptor;
     private InterestingPoint point;
 
-    public static SIFTDescriptor at(Matrix gradient,
-                                    Matrix gradientAngle,
-                                    final InterestingPoint point,
-                                    final int gridSize,
-                                    final int cellSize,
-                                    final int binsCount) {
-        SIFTDescriptor siftDescriptor = new SIFTDescriptor();
-        siftDescriptor.point = point;
-        siftDescriptor.descriptor = new double[gridSize * gridSize * binsCount];
+    public static List<SIFTDescriptor> at(Matrix gradient,
+                                                Matrix gradientAngle,
+                                                final InterestingPoint point,
+                                                final int gridSize,
+                                                final int cellSize,
+                                                final int binsCount) {
+        List<SIFTDescriptor> descriptorList = new LinkedList<>();
+        double[] mainAngles = getMainAngles(gradient, gradientAngle, point, gridSize, cellSize);
 
-        AngleBin[][] bins = new AngleBin[gridSize][gridSize];
-        for (int i = 0; i < gridSize; i++)
-            for (int j = 0; j < gridSize; j++)
-                bins[i][j] = new AngleBin(binsCount);
+        for (double mainAngle : mainAngles) {
+            SIFTDescriptor siftDescriptor = new SIFTDescriptor();
+            siftDescriptor.descriptor = new double[gridSize * gridSize * binsCount];
 
-        double mainAngle = getMainAngle(gradient, gradientAngle, point, gridSize, cellSize);
+            AngleBin[][] bins = new AngleBin[gridSize][gridSize];
+            for (int i = 0; i < gridSize; i++)
+                for (int j = 0; j < gridSize; j++)
+                    bins[i][j] = new AngleBin(binsCount);
 
-        int border = gridSize * cellSize;
-        int halfBorder = border / 2;
+            siftDescriptor.point = InterestingPoint.at(point.getX(), point.getY(), point.getProbability(), mainAngle);
 
-        SeparableMatrix gauss = separableMatrixFrom(getGaussMatrices(halfBorder));
-        int left = -halfBorder, right = border - halfBorder;
+            int border = gridSize * cellSize;
+            int halfBorder = border / 2;
 
-        for (int x = left; x < right; x++) {
-            for (int y = left; y < right; y++) {
-                int rotatedX = rotateX(x, y, mainAngle);
-                int rotatedY = rotateY(x, y, mainAngle);
+            SeparableMatrix gauss = separableMatrixFrom(getGaussMatrices(halfBorder, halfBorder / 2.0));
+            int left = -halfBorder, right = border - halfBorder;
 
-                if (rotatedX < left || rotatedX >= right || rotatedY < left || rotatedY >= right) continue;
+            for (int x = left; x < right; x++) {
+                for (int y = left; y < right; y++) {
+                    int rotatedX = rotateX(x, y, mainAngle);
+                    int rotatedY = rotateY(x, y, mainAngle);
 
-                int realX = point.getX() + rotatedX;
-                int realY = point.getY() + rotatedY;
-                double phi = gradientAngle.getAt(realX, realY, BorderHandling.Mirror);
-                double gradientValue = gradient.getAt(realX, realY, BorderHandling.Mirror);
-                double gaussValue = gauss.getAt(halfBorder + rotatedX, halfBorder + rotatedY);
+                    if (rotatedX < left || rotatedX >= right || rotatedY < left || rotatedY >= right) continue;
 
-                putToBin(bins, rotatedX, rotatedY, left, cellSize, phi - mainAngle, gradientValue * gaussValue);
+                    int realX = point.getX() + x;
+                    int realY = point.getY() + y;
+                    double phi = gradientAngle.getAt(realX, realY, BorderHandling.Mirror);
+                    double gradientValue = gradient.getAt(realX, realY, BorderHandling.Mirror);
+                    double gaussValue = gauss.getAt(halfBorder + rotatedX, halfBorder + rotatedY);
+
+                    putToBin(bins, rotatedX, rotatedY, left, cellSize, phi + mainAngle, gradientValue * gaussValue);
+                }
             }
-        }
-        int ptr = 0;
-        for (int i = 0; i < gridSize; i++) {
-            for (int j = 0; j < gridSize; j++) {
-                System.arraycopy(bins[i][j].getBin(), 0, siftDescriptor.descriptor, ptr, binsCount);
-                ptr += binsCount;
+            int ptr = 0;
+            for (int i = 0; i < gridSize; i++) {
+                for (int j = 0; j < gridSize; j++) {
+                    System.arraycopy(bins[i][j].getBin(), 0, siftDescriptor.descriptor, ptr, binsCount);
+                    ptr += binsCount;
+                }
             }
+            descriptorList.add(siftDescriptor);
         }
 
-        return siftDescriptor;
+        return descriptorList;
     }
 
     private static void putToBin(@NotNull AngleBin[][] bins, int realX, int realY, int left, int cellSize,
@@ -83,11 +93,11 @@ public class SIFTDescriptor extends AbstractDescriptor {
         return (int) (y * Math.cos(angle) - x * Math.sin(angle));
     }
 
-    private static double getMainAngle(Matrix gradient,
-                                       Matrix gradientAngle,
-                                       final InterestingPoint point,
-                                       final int gridSize,
-                                       final int cellSize) {
+    private static double[] getMainAngles(Matrix gradient,
+                                          Matrix gradientAngle,
+                                          final InterestingPoint point,
+                                          final int gridSize,
+                                          final int cellSize) {
         final int binSize = 36;
         AngleBin bin = new AngleBin(binSize);
 
@@ -108,7 +118,11 @@ public class SIFTDescriptor extends AbstractDescriptor {
             }
         }
 
-        return bin.getPeek();
+        double[] peeks = bin.getPeeks();
+        for (int i = 0; i < peeks.length; i++)
+            peeks[i] = 2 * Math.PI - peeks[i];
+
+        return peeks;
     }
 
     @Override
@@ -122,7 +136,7 @@ public class SIFTDescriptor extends AbstractDescriptor {
     }
 
     @Override
-    InterestingPoint getPoint() {
+    public InterestingPoint getPoint() {
         return point;
     }
 

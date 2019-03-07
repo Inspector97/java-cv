@@ -26,11 +26,11 @@ public class SiftAlgo implements Algorithm {
                                   gridSize,
                                   cellSize,
                                   binCount);
-        List<PointsPair> matching = Stopwatch.measure(() -> HOGProcessor.process(imageA, imageB, descriptor));
+        ToDraw matching = Stopwatch.measure(() -> HOGProcessor.process(imageA, imageB, descriptor));
 
         BufferedImage result = markMatching(imageA, imageB, matching);
         write(getSaveFilePath(path, "SIFT_MATCHING"), result);
 
-        System.out.println("Matched " + matching.size());
+        System.out.println("Matched " + matching.getPointsPairs().size());
     }
 }

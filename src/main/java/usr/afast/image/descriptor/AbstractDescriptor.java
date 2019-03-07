@@ -32,5 +32,5 @@ public abstract class AbstractDescriptor {
 
     abstract double[] getDescriptor();
 
-    abstract InterestingPoint getPoint();
+    public abstract InterestingPoint getPoint();
 }

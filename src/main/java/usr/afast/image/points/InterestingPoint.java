@@ -17,6 +17,7 @@ public class InterestingPoint {
     private int x;
     private int y;
     private double probability;
+    private double angle;
 
     public static double distance(@NotNull InterestingPoint a, @NotNull InterestingPoint b) {
         return sqrt(sqr(a.x - b.x) + sqr(a.y - b.y));

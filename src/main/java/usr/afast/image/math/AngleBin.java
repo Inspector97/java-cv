@@ -6,6 +6,7 @@ import usr.afast.image.wrapped.Matrix;
 
 @Getter
 public class AngleBin {
+    private static final double MAX = 2 * Math.PI;
     private static final double EPS = 1e-6;
     private double[] bin;
     private int size;
@@ -14,7 +15,7 @@ public class AngleBin {
     public AngleBin(int size) {
         this.size = size;
         this.bin = new double[size];
-        step = Math.PI / size;
+        step = MAX / size;
     }
 
     public void addAngle(double angle, double value) {
@@ -36,13 +37,14 @@ public class AngleBin {
     @Contract(pure = true)
     private double normalize(double angle) {
         while (angle < 0)
-            angle += Math.PI;
-        while (angle >= Math.PI)
-            angle -= Math.PI;
+            angle += MAX;
+        while (angle >= MAX)
+            angle -= MAX;
         return angle;
     }
 
-    public double getPeek() {
+    public double[] getPeeks() {
+        double[] result = new double[1];
         double max = Double.MIN_VALUE;
         double angle = -1;
         for (int i = 0; i < size; i++) {
@@ -51,6 +53,23 @@ public class AngleBin {
                 angle = (i + 0.5) * step;
             }
         }
-        return angle;
+        result[0] = angle;
+
+        double bord = max * 0.8;
+        double secondMax = Double.MIN_VALUE;
+        for (int i = 0; i < size; i++) {
+            if (bin[i] > bord && bin[i] != max && bin[i] > secondMax) {
+                secondMax = bin[i];
+                angle = (i + 0.5) * step;
+            }
+        }
+        if (secondMax != Double.MIN_VALUE) {
+            double tmp = result[0];
+            result = new double[2];
+            result[0] = tmp;
+            result[1] = angle;
+        }
+
+        return result;
     }
 }

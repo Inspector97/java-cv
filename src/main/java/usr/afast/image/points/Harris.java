@@ -19,7 +19,7 @@ import static usr.afast.image.util.Math.sqr;
 @SuppressWarnings("Duplicates")
 public class Harris {
     private static final String TEMP_PATH = "E:\\test_images\\grid\\temp.png";
-    private static double MIN_PROBABILITY = 0.05;
+    private static double MIN_PROBABILITY = 0.075;
     private static int MAX_SIZE = 800;
     private static final int WINDOW_RADIUS = 4;
 

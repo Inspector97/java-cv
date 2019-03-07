@@ -54,7 +54,7 @@ public class PatchDescriptor extends AbstractDescriptor {
     }
 
     @Override
-    InterestingPoint getPoint() {
+    public InterestingPoint getPoint() {
         return point;
     }
 

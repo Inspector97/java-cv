@@ -1,9 +1,6 @@
 package usr.afast.image.algo;
 
-import usr.afast.image.descriptor.GistogramBasedDescriptor;
-import usr.afast.image.descriptor.HOGDescriptor;
-import usr.afast.image.descriptor.PointsPair;
-import usr.afast.image.descriptor.HOGProcessor;
+import usr.afast.image.descriptor.*;
 import usr.afast.image.points.InterestingPoint;
 import usr.afast.image.util.Stopwatch;
 import usr.afast.image.wrapped.Matrix;
@@ -30,11 +27,11 @@ public class HogAlgo implements Algorithm {
                                  gridSize,
                                  cellSize,
                                  binCount);
-        List<PointsPair> matching = Stopwatch.measure(() -> HOGProcessor.process(imageA, imageB, descriptor));
+        ToDraw matching = Stopwatch.measure(() -> HOGProcessor.process(imageA, imageB, descriptor));
 
         BufferedImage result = markMatching(imageA, imageB, matching);
         write(getSaveFilePath(path, "HOG_MATCHING"), result);
 
-        System.out.println("Matched " + matching.size());
+        System.out.println("Matched " + matching.getPointsPairs().size());
     }
 }
