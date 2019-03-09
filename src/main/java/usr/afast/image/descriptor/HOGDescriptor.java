@@ -37,8 +37,6 @@ public class HOGDescriptor extends AbstractDescriptor {
             for (int j = 0; j < gridSize; j++)
                 bins[i][j] = new AngleBin(binsCount);
 
-        double mainAngle = 0;//getMainAngle(gradient, gradientAngle, point, gridSize, cellSize);
-
         int border = gridSize * cellSize;
         int halfBorder = border / 2;
 
@@ -53,7 +51,7 @@ public class HOGDescriptor extends AbstractDescriptor {
                 double gradientValue = gradient.getAt(realX, realY, BorderHandling.Mirror);
                 double gaussValue = gauss.getAt(halfBorder + x, halfBorder + y);
 
-                putToBin(bins, x, y, left, cellSize, phi - mainAngle, gradientValue * gaussValue);
+                putToBin(bins, x, y, left, cellSize, phi, gradientValue * gaussValue);
             }
         }
         int ptr = 0;
