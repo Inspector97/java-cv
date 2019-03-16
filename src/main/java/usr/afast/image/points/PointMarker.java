@@ -1,9 +1,7 @@
 package usr.afast.image.points;
 
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import usr.afast.image.descriptor.AbstractDescriptor;
-import usr.afast.image.descriptor.Circle;
 import usr.afast.image.descriptor.PointsPair;
 import usr.afast.image.descriptor.ToDraw;
 import usr.afast.image.wrapped.Matrix;
@@ -12,8 +10,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static usr.afast.image.util.ImageIO.write;
 
 public class PointMarker {
     private static final double SPECTRUM_OFFSET = 180D / 255;
@@ -26,9 +22,9 @@ public class PointMarker {
         BufferedImage result = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
         Graphics2D graphics = result.createGraphics();
         graphics.drawImage(image, 0, 0, null);
-        int radius = 2;
         graphics.setStroke(new BasicStroke(1));
         for (InterestingPoint interestingPoint : interestingPoints) {
+            int radius = (int) interestingPoint.getRadius();
             int x = interestingPoint.getX() - radius;
             int y = interestingPoint.getY() - radius;
             graphics.setColor(getSpectrum(interestingPoint.getProbability()));
@@ -45,28 +41,6 @@ public class PointMarker {
         }
         graphics.dispose();
 
-        return result;
-    }
-
-    public static BufferedImage drawCircles(List<Circle> circles, Matrix matrix) {
-        return drawCircles(circles, Matrix.save(matrix));
-    }
-
-    public static BufferedImage drawCircles(List<Circle> circles, BufferedImage image) {
-        BufferedImage result = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
-        Graphics2D graphics = result.createGraphics();
-        graphics.drawImage(image, 0, 0, null);
-        graphics.setStroke(new BasicStroke(1));
-
-        for (Circle circle : circles) {
-            int x = (int) (circle.getX() - circle.getRadius());
-            int y = (int) (circle.getY() - circle.getRadius());
-            graphics.setColor(getSpectrum(circle.getColor()));
-            graphics.drawOval(x, y, (int) (2 * circle.getRadius()),
-                              (int) (2 * circle.getRadius()));
-        }
-
-        graphics.dispose();
         return result;
     }
 

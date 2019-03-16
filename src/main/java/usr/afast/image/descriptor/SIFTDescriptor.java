@@ -24,13 +24,23 @@ public class SIFTDescriptor extends AbstractDescriptor {
     private InterestingPoint point;
 
     public static List<SIFTDescriptor> at(Matrix gradient,
-                                                Matrix gradientAngle,
-                                                final InterestingPoint point,
-                                                final int gridSize,
-                                                final int cellSize,
-                                                final int binsCount) {
+                                          Matrix gradientAngle,
+                                          final InterestingPoint point,
+                                          final int gridSize,
+                                          final int cellSize,
+                                          final int binsCount) {
+        return at(gradient, gradientAngle, point, gridSize, cellSize, binsCount, 1);
+    }
+
+    public static List<SIFTDescriptor> at(Matrix gradient,
+                                          Matrix gradientAngle,
+                                          final InterestingPoint point,
+                                          final int gridSize,
+                                          final int cellSize,
+                                          final int binsCount,
+                                          final int scale) {
         List<SIFTDescriptor> descriptorList = new LinkedList<>();
-        double[] mainAngles = getMainAngles(gradient, gradientAngle, point, gridSize, cellSize);
+        double[] mainAngles = getMainAngles(gradient, gradientAngle, point, gridSize, cellSize, scale);
 
         for (double mainAngle : mainAngles) {
             SIFTDescriptor siftDescriptor = new SIFTDescriptor();
@@ -41,7 +51,11 @@ public class SIFTDescriptor extends AbstractDescriptor {
                 for (int j = 0; j < gridSize; j++)
                     bins[i][j] = new AngleBin(binsCount);
 
-            siftDescriptor.point = InterestingPoint.at(point.getX(), point.getY(), point.getProbability(), mainAngle);
+            siftDescriptor.point = InterestingPoint.at(point.getX(), point.getY(), point.getProbability(), point.getRadius(),
+                                                       mainAngle);
+
+            int actualX = (point.getX() / scale);
+            int actualY = (point.getY() / scale);
 
             int border = gridSize * cellSize;
             int halfBorder = border / 2;
@@ -56,8 +70,8 @@ public class SIFTDescriptor extends AbstractDescriptor {
 
                     if (rotatedX < left || rotatedX >= right || rotatedY < left || rotatedY >= right) continue;
 
-                    int realX = point.getX() + x;
-                    int realY = point.getY() + y;
+                    int realX = actualX + x;
+                    int realY = actualY + y;
                     double phi = gradientAngle.getAt(realX, realY, BorderHandling.Mirror);
                     double gradientValue = gradient.getAt(realX, realY, BorderHandling.Mirror);
                     double gaussValue = gauss.getAt(halfBorder + rotatedX, halfBorder + rotatedY);
@@ -97,7 +111,8 @@ public class SIFTDescriptor extends AbstractDescriptor {
                                           Matrix gradientAngle,
                                           final InterestingPoint point,
                                           final int gridSize,
-                                          final int cellSize) {
+                                          final int cellSize,
+                                          final int scale) {
         final int binSize = 36;
         AngleBin bin = new AngleBin(binSize);
 
@@ -106,10 +121,13 @@ public class SIFTDescriptor extends AbstractDescriptor {
 
         SeparableMatrix gauss = separableMatrixFrom(getGaussMatrices(halfBorder));
 
+        int actualX = (point.getX() / scale);
+        int actualY = (point.getY() / scale);
+
         for (int x = -halfBorder; x < border - halfBorder; x++) {
             for (int y = -halfBorder; y < border - halfBorder; y++) {
-                int realX = point.getX() + x;
-                int realY = point.getY() + y;
+                int realX = actualX + x;
+                int realY = actualY + y;
                 double phi = gradientAngle.getAt(realX, realY, BorderHandling.Mirror);
                 double gradientValue = gradient.getAt(realX, realY, BorderHandling.Mirror);
                 double gaussValue = gauss.getAt(halfBorder + x, halfBorder + y);

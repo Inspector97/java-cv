@@ -18,7 +18,7 @@ public class DescriptorUtil {
             pointsMatching.add(PointsPair.from(descriptorA.getPoint(), closest.getPoint()));
         }
 
-        return new ToDraw(pointsMatching, new ArrayList<>(descriptorsA), new ArrayList<>(descriptorsB), new ArrayList<>());
+        return new ToDraw(pointsMatching, new ArrayList<>(descriptorsA), new ArrayList<>(descriptorsB));
     }
 
     private static AbstractDescriptor getClosest(AbstractDescriptor descriptor,

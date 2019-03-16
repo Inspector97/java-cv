@@ -22,7 +22,7 @@ import static usr.afast.image.util.ImageIO.write;
 
 @Getter
 public class Pyramid {
-    private static final int MIN_IMAGE_SIZE = 50;
+    private static final int MIN_IMAGE_SIZE = 20;
     private static final int OVERLAP = 2;
     private int depth;
     private double initSigma;
@@ -41,13 +41,13 @@ public class Pyramid {
         pyramid.octaves = new LinkedList<>();
         pyramid.depth = 0;
 
-        Matrix current = makeFirstImage(image, initSigma, startSigma);
-
         pyramid.minusFirstOctave = Octave.build(makeFirstImage(upscale(image), initSigma, startSigma),
                                                 -1,
                                                 startSigma,
                                                 octaveSize,
                                                 OVERLAP);
+
+        Matrix current = pyramid.minusFirstOctave.getNextImage().downSample();
 
         while (current.getHeight() > MIN_IMAGE_SIZE && current.getWidth() > MIN_IMAGE_SIZE) {
             Octave newOctave = Octave.build(current, pyramid.depth, startSigma, octaveSize, OVERLAP);

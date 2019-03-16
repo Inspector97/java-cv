@@ -29,7 +29,7 @@ public class Harris {
         int width = image.getWidth();
         int height = image.getHeight();
 
-        Matrix harris = getHarrisMat(image, width, height);
+        Matrix harris = getHarrisMat(image, width, height, WINDOW_RADIUS);
 
 //        write(TEMP_PATH, harris);
 
@@ -43,22 +43,26 @@ public class Harris {
         return candidates.subList(0, Math.min(candidates.size(), MAX_SIZE));
     }
 
-    private static Matrix getHarrisMat(Matrix image, int width, int height) {
+    public static Matrix getHarrisMat(Matrix image, int radius) {
+        return getHarrisMat(image, image.getWidth(), image.getHeight(), radius);
+    }
+
+    private static Matrix getHarrisMat(Matrix image, int width, int height, int radius) {
         Matrix harrisMat = new Matrix(width, height);
 
         Matrix xDerivative = getSobelX(image, BorderHandling.Mirror);
         Matrix yDerivative = getSobelY(image, BorderHandling.Mirror);
 
-        SeparableMatrix gauss = separableMatrixFrom(getGaussMatrices(WINDOW_RADIUS));
+        SeparableMatrix gauss = separableMatrixFrom(getGaussMatrices(radius));
 
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 double[][] currentMatrix = new double[2][2];
-                for (int u = -WINDOW_RADIUS; u <= WINDOW_RADIUS; u++) {
-                    for (int v = -WINDOW_RADIUS; v <= WINDOW_RADIUS; v++) {
+                for (int u = -radius; u <= radius; u++) {
+                    for (int v = -radius; v <= radius; v++) {
                         double Ix = xDerivative.getAt(x + u, y + v, BorderHandling.Mirror);
                         double Iy = yDerivative.getAt(x + u, y + v, BorderHandling.Mirror);
-                        double gaussPoint = gauss.getAt(u + WINDOW_RADIUS, v + WINDOW_RADIUS);
+                        double gaussPoint = gauss.getAt(u + radius, v + radius);
                         currentMatrix[0][0] += sqr(Ix) * gaussPoint;
                         currentMatrix[0][1] += Ix * Iy * gaussPoint;
                         currentMatrix[1][0] += Ix * Iy * gaussPoint;

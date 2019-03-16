@@ -34,7 +34,7 @@ public class Octave {
             double delta = Math.sqrt(nextSigma * nextSigma - localSigma * localSigma);
 
             current = makeGauss(current, delta, BorderHandling.Mirror);
-            octave.images.add(new OctaveLayer(i + 1, localSigma, globalSigma, current));
+            octave.images.add(new OctaveLayer(i + 1, nextSigma, globalSigma, current));
 
             localSigma = nextSigma;
         }

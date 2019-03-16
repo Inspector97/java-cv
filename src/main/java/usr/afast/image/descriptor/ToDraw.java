@@ -11,5 +11,4 @@ public class ToDraw {
     private List<PointsPair> pointsPairs;
     private List<AbstractDescriptor> descriptorsA;
     private List<AbstractDescriptor> descriptorsB;
-    private List<Circle> circles;
 }
