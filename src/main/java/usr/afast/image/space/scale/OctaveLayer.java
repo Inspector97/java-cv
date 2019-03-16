@@ -11,4 +11,9 @@ public class OctaveLayer {
     private double localSigma;
     private double globalSigma;
     private Matrix image;
+
+    public static OctaveLayer downSample(OctaveLayer layer) {
+        return new OctaveLayer(layer.getIndex(), layer.getLocalSigma(), layer.getGlobalSigma(),
+                               layer.getImage().downSample());
+    }
 }

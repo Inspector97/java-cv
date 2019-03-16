@@ -171,6 +171,18 @@ public class Matrix {
         return gradientAngle;
     }
 
+    public static Matrix subtract(@NotNull Matrix aMatrix, @NotNull Matrix bMatrix) {
+        if (aMatrix.height != bMatrix.height || aMatrix.width != bMatrix.width)
+            throw new IllegalArgumentException("Изображения разного размера");
+        Matrix result = new Matrix(aMatrix.width, aMatrix.height);
+        for (int i = 0; i < result.width; i++) {
+            for (int j = 0; j < result.height; j++) {
+                result.setAt(i, j, aMatrix.getAt(i, j) - bMatrix.getAt(i, j));
+            }
+        }
+        return result;
+    }
+
     @Contract(pure = true)
     private static double sqr(double value) {
         return value * value;

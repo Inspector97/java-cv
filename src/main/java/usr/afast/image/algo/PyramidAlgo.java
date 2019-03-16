@@ -14,14 +14,13 @@ import static usr.afast.image.util.StringArgsUtil.*;
 public class PyramidAlgo implements Algorithm {
     @Override
     public void process(String path, String... args) {
-        if (args.length < 4) {
+        if (args.length < 3) {
             System.out.println("invalid args");
             return;
         }
-        final BorderHandling borderHandling = getBorderHandling(0, args);
-        double initSigma = getDouble(1, args);
-        double startSigma = getDouble(2, args);
-        int octaveSize = getInt(3, args);
+        double initSigma = getDouble(0, args);
+        double startSigma = getDouble(1, args);
+        int octaveSize = getInt(2, args);
         BufferedImage image = read(path);
         Matrix matrix = Matrix.of(image);
 
@@ -36,15 +35,6 @@ public class PyramidAlgo implements Algorithm {
 
         File file = new File(path);
         pyramid.save(path);
-//        pyramid.getAt(2, 5, 4);
-
-//        System.out.println(String.format("Gauss with sigma %.3f", sigma));
-//        BufferedImage image = read(path);
-//        Matrix matrix = Matrix.of(image);
-//        write(getSaveFilePath(path, "original"), Matrix.save(matrix));
-//        BufferedImage bufferedImageResult = Matrix.save(result);
-//        String newFilePath = getSaveFilePath(path, getClass().getSimpleName());
-//        write(newFilePath, bufferedImageResult);
     }
 
 

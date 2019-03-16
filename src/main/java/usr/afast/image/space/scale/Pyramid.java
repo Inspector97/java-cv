@@ -11,16 +11,19 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import static usr.afast.image.algo.AlgoLib.makeGauss;
+import static usr.afast.image.space.scale.OctaveLayer.downSample;
 import static usr.afast.image.util.ImageIO.getSaveFilePath;
 import static usr.afast.image.util.ImageIO.write;
 
 @Getter
 public class Pyramid {
-    private static int MIN_IMAGE_SIZE = 20;
+    private static final int MIN_IMAGE_SIZE = 20;
+    private static final int OVERLAP = 2;
     private int depth;
     private double initSigma;
     private double startSigma;
@@ -43,10 +46,11 @@ public class Pyramid {
         pyramid.minusFirstOctave = Octave.build(makeFirstImage(upscale(image), initSigma, startSigma),
                                                 -1,
                                                 startSigma,
-                                                octaveSize);
+                                                octaveSize,
+                                                OVERLAP);
 
         while (current.getHeight() > MIN_IMAGE_SIZE && current.getWidth() > MIN_IMAGE_SIZE) {
-            Octave newOctave = Octave.build(current, pyramid.depth, startSigma, octaveSize);
+            Octave newOctave = Octave.build(current, pyramid.depth, startSigma, octaveSize, OVERLAP);
             pyramid.octaves.add(newOctave);
             current = newOctave.getNextImage().downSample();
             pyramid.depth++;
@@ -62,10 +66,39 @@ public class Pyramid {
         return makeGauss(original, delta, BorderHandling.Mirror);
     }
 
+    public Octave getByIndex(int index) {
+        if (index >= 0)
+            return octaves.get(index);
+        if (index < -1)
+            throw new IllegalArgumentException();
+        return minusFirstOctave;
+    }
+
+    public List<OctaveLayer> getDoG(int index) {
+        if (index < 0 || index >= depth)
+            throw new IllegalArgumentException();
+        Octave previous = getByIndex(index - 1);
+        Octave current = getByIndex(index);
+        List<OctaveLayer> gaussians = new ArrayList<>(octaveSize + 4);
+        gaussians.add(downSample(previous.getImages().get(octaveSize - 2)));
+        gaussians.add(downSample(previous.getImages().get(octaveSize - 1)));
+        for (int i = 0; i < octaveSize + 2; i++)
+            gaussians.add(current.getImages().get(i));
+
+        List<OctaveLayer> DoGs = new ArrayList<>(octaveSize + 2);
+        for (int i = 1; i < octaveSize + 4; i++) {
+            OctaveLayer cur = gaussians.get(i);
+            OctaveLayer prev = gaussians.get(i - 1);
+            Matrix delta = Matrix.subtract(cur.getImage(), prev.getImage());
+            DoGs.add(new OctaveLayer(i - 1, cur.getLocalSigma(), cur.getGlobalSigma(), delta));
+        }
+        return DoGs;
+    }
+
     public double getPixel(int x, int y, double sigma) {
         double step = Math.pow(2, 1.0 / octaveSize);
         double log = Math.log(sigma) / Math.log(step);
-        int index = (int)Math.round(log) + 1;
+        int index = (int) Math.round(log) + 1;
         int octaveIndex = index / octaveSize;
         if (octaveIndex >= octaves.size()) {
             throw new IllegalArgumentException("Sigma too big");

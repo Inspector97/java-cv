@@ -16,9 +16,9 @@ public class Octave {
     private List<OctaveLayer> images;
     private Matrix nextImage;
 
-    public static Octave build(Matrix image, int number, double startSigma, int size) {
+    public static Octave build(Matrix image, int number, double startSigma, int size, int overlap) {
         Octave octave = new Octave();
-        octave.images = new ArrayList<>(size + 1);
+        octave.images = new ArrayList<>(size + 1 + overlap);
         octave.startSigma = startSigma;
         octave.number = number;
 
@@ -28,7 +28,7 @@ public class Octave {
 
         Matrix current = new Matrix(image);
         octave.images.add(new OctaveLayer(0, localSigma, globalSigma, current));
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < size + overlap; i++) {
             double nextSigma = localSigma * step;
             globalSigma = globalSigma * step;
             double delta = Math.sqrt(nextSigma * nextSigma - localSigma * localSigma);
