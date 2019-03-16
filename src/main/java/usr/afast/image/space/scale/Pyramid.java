@@ -22,7 +22,7 @@ import static usr.afast.image.util.ImageIO.write;
 
 @Getter
 public class Pyramid {
-    private static final int MIN_IMAGE_SIZE = 20;
+    private static final int MIN_IMAGE_SIZE = 50;
     private static final int OVERLAP = 2;
     private int depth;
     private double initSigma;

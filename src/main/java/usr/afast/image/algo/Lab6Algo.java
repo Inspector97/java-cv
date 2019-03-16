@@ -1,6 +1,7 @@
 package usr.afast.image.algo;
 
 import org.apache.commons.io.FileUtils;
+import usr.afast.image.descriptor.Circle;
 import usr.afast.image.space.scale.Octave;
 import usr.afast.image.space.scale.OctaveLayer;
 import usr.afast.image.space.scale.Pyramid;
@@ -14,6 +15,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
+import static usr.afast.image.descriptor.BlobFinder.findBlobs;
+import static usr.afast.image.points.PointMarker.drawCircles;
 import static usr.afast.image.util.ImageIO.*;
 import static usr.afast.image.util.StringArgsUtil.getDouble;
 import static usr.afast.image.util.StringArgsUtil.getInt;
@@ -32,41 +35,11 @@ public class Lab6Algo implements Algorithm {
         BufferedImage image = read(path);
         Matrix matrix = Matrix.of(image);
 
-        System.out.println(String.format("Building pyramid with initSigma=%.3f, startSigma=%.3f, octaveSize=%d",
-                                         initSigma,
-                                         startSigma,
-                                         octaveSize));
+        List<Circle> circles = Stopwatch.measure(() -> findBlobs(matrix, path));
 
-        Pyramid pyramid = Stopwatch.measure(() -> Pyramid.build(matrix, initSigma, startSigma, octaveSize));
+        BufferedImage withBlobs = drawCircles(circles, matrix);
 
-        File file = new File(path);
-        String folderPath = Paths.get(file.getParent(), "DoGs").toString();
-        File newFolder = new File(folderPath);
-        System.out.println(newFolder);
-        try {
-            FileUtils.deleteDirectory(newFolder);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            Files.createDirectory(Paths.get(folderPath));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        path = Paths.get(folderPath, file.getName()).toString();
-        for (int i = 0; i < pyramid.getDepth(); i++) {
-            List<OctaveLayer> layers = pyramid.getDoG(i);
-            for (OctaveLayer octaveLayer : layers) {
-                String suffix = String.format("[oct=%d, idx=%d, globalSigma=%.2f]",
-                                              i,
-                                              octaveLayer.getIndex(),
-                                              octaveLayer.getGlobalSigma());
-                System.out.println(suffix);
-                write(getSaveFilePath(path, suffix), Matrix.save(octaveLayer.getImage()));
-            }
-        }
-
-        System.out.println(String.format("Pyramid built with depth=%d", pyramid.getDepth()));
+        write(getSaveFilePath(path, "BLOBS"), withBlobs);
 
 //        pyramid.save(path);
     }

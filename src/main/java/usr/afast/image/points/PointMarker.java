@@ -3,6 +3,7 @@ package usr.afast.image.points;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import usr.afast.image.descriptor.AbstractDescriptor;
+import usr.afast.image.descriptor.Circle;
 import usr.afast.image.descriptor.PointsPair;
 import usr.afast.image.descriptor.ToDraw;
 import usr.afast.image.wrapped.Matrix;
@@ -39,7 +40,7 @@ public class PointMarker {
             int dy = (int) (Math.sin(angle) * 10);
 
             graphics.drawLine(interestingPoint.getX(), interestingPoint.getY(),
-                    interestingPoint.getX() + dx, interestingPoint.getY() + dy);
+                              interestingPoint.getX() + dx, interestingPoint.getY() + dy);
 
         }
         graphics.dispose();
@@ -47,23 +48,45 @@ public class PointMarker {
         return result;
     }
 
+    public static BufferedImage drawCircles(List<Circle> circles, Matrix matrix) {
+        return drawCircles(circles, Matrix.save(matrix));
+    }
+
+    public static BufferedImage drawCircles(List<Circle> circles, BufferedImage image) {
+        BufferedImage result = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+        Graphics2D graphics = result.createGraphics();
+        graphics.drawImage(image, 0, 0, null);
+        graphics.setStroke(new BasicStroke(1));
+
+        for (Circle circle : circles) {
+            int x = (int) (circle.getX() - circle.getRadius());
+            int y = (int) (circle.getY() - circle.getRadius());
+            graphics.setColor(getSpectrum(circle.getColor()));
+            graphics.drawOval(x, y, (int) (2 * circle.getRadius()),
+                              (int) (2 * circle.getRadius()));
+        }
+
+        graphics.dispose();
+        return result;
+    }
+
     public static BufferedImage markMatching(Matrix imageA, Matrix imageB, @NotNull ToDraw matching) {
         List<InterestingPoint> pointA = matching.getDescriptorsA()
-                .stream()
-                .map(AbstractDescriptor::getPoint)
-                .collect(Collectors.toList());
+                                                .stream()
+                                                .map(AbstractDescriptor::getPoint)
+                                                .collect(Collectors.toList());
 
         List<InterestingPoint> pointB = matching.getDescriptorsB()
-                .stream()
-                .map(AbstractDescriptor::getPoint)
-                .collect(Collectors.toList());
+                                                .stream()
+                                                .map(AbstractDescriptor::getPoint)
+                                                .collect(Collectors.toList());
 
         BufferedImage bufferedA = markPoints(pointA, Matrix.save(imageA));
         BufferedImage bufferedB = markPoints(pointB, Matrix.save(imageB));
 
         BufferedImage result = new BufferedImage(bufferedA.getWidth() + bufferedB.getWidth(),
-                Math.max(bufferedA.getHeight(), bufferedB.getHeight()),
-                BufferedImage.TYPE_INT_ARGB);
+                                                 Math.max(bufferedA.getHeight(), bufferedB.getHeight()),
+                                                 BufferedImage.TYPE_INT_ARGB);
         Graphics2D graphics = result.createGraphics();
 
         graphics.drawImage(bufferedA, 0, 0, null);
