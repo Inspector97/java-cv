@@ -26,7 +26,7 @@ public class BlobFinder {
     private static final double START_SIGMA = 1;
     private static final int OCTAVE_SIZE = 4;
     private static final double EPS = 1e-4;
-    private static final double MIN_HARRIS = 0.01;
+    private static final double MIN_HARRIS = 0.03;
 
     public static ToDraw matchBlobs(Matrix aMatrix, Matrix bMatrix, String path) {
         List<AbstractDescriptor> abstractDescriptorsA = findBlobs(aMatrix, path);
@@ -59,13 +59,14 @@ public class BlobFinder {
 
                 Matrix gradient = Matrix.getGradient(xImage, yImage);
                 Matrix gradientAngle = Matrix.getGradientAngle(xImage, yImage);
-                Matrix harris = getHarrisMat(startImage, radius);
+                Matrix harris = Matrix.normalize(getHarrisMat(startImage, radius));
 
                 for (int x = 0; x < cur.getWidth(); x++) {
                     for (int y = 0; y < cur.getHeight(); y++) {
                         boolean okMax = true;
                         boolean okMin = true;
                         double pixel = cur.getAt(x, y);
+                        if (Math.abs(pixel) < 0.03) continue;
                         double harrisValue = harris.getAt(x, y);
                         for (int dx = -1; dx <= 1; dx++) {
                             for (int dy = -1; dy <= 1; dy++) {
@@ -83,9 +84,9 @@ public class BlobFinder {
                         }
 
                         if ((okMax || okMin) && harrisValue > MIN_HARRIS) {
-                            System.out.println(harrisValue);
-                            InterestingPoint at = InterestingPoint.at(x * pow,
-                                                                      y * pow,
+                            System.out.println(harrisValue + " " + pixel);
+                            InterestingPoint at = InterestingPoint.at(x * pow + pow / 2,
+                                                                      y * pow + pow / 2,
                                                                       pixel * 100,
                                                                       layers.get(j).getGlobalSigma() * sqrt2,
                                                                       0);
@@ -95,7 +96,7 @@ public class BlobFinder {
                                                       at,
                                                       8,
                                                       (int) Math.ceil(layers.get(j).getLocalSigma() * sqrt2 / 4),
-                                                      16,
+                                                      36,
                                                       pow);
                             descriptors.addAll(locals);
                         }
