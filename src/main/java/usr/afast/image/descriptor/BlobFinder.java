@@ -46,19 +46,18 @@ public class BlobFinder {
         for (int i = 0; i < pyramid.getDepth(); i++, pow *= 2) {
             List<OctaveLayer> layers = pyramid.getDoG(i);
             Matrix startImage = pyramid.getOctaves().get(i).getImages().get(0).getImage();
+
+            Matrix xImage = getSobelX(startImage, BorderHandling.Mirror);
+            Matrix yImage = getSobelY(startImage, BorderHandling.Mirror);
+
+            Matrix gradient = Matrix.getGradient(xImage, yImage);
+            Matrix gradientAngle = Matrix.getGradientAngle(xImage, yImage);
             for (int j = 1; j <= OCTAVE_SIZE; j++) {
                 Matrix prev = layers.get(j - 1).getImage();
                 Matrix cur = layers.get(j).getImage();
                 Matrix next = layers.get(j + 1).getImage();
 
                 int radius = (int) (layers.get(j).getLocalSigma() * sqrt2);
-                Matrix curImage = pyramid.getOctaves().get(i).getImages().get(j - 1).getImage();
-
-                Matrix xImage = getSobelX(curImage, BorderHandling.Mirror);
-                Matrix yImage = getSobelY(curImage, BorderHandling.Mirror);
-
-                Matrix gradient = Matrix.getGradient(xImage, yImage);
-                Matrix gradientAngle = Matrix.getGradientAngle(xImage, yImage);
                 Matrix harris = Matrix.normalize(getHarrisMat(startImage, radius));
 
                 for (int x = 0; x < cur.getWidth(); x++) {
@@ -79,7 +78,6 @@ public class BlobFinder {
                                     okMax &= pixel > cur.getAt(x + dx, y + dy, BorderHandling.Mirror) + EPS;
                                     okMin &= pixel < cur.getAt(x + dx, y + dy, BorderHandling.Mirror) - EPS;
                                 }
-
                             }
                         }
 
@@ -95,9 +93,10 @@ public class BlobFinder {
                                                       gradientAngle,
                                                       at,
                                                       8,
-                                                      (int) Math.ceil(layers.get(j).getLocalSigma() * sqrt2 / 4),
-                                                      36,
-                                                      pow);
+                                                      (int) Math.ceil(layers.get(j).getLocalSigma() * sqrt2 / 2),
+                                                      16,
+                                                      pow,
+                                                      layers.get(j).getLocalSigma() / INIT_SIGMA);
                             descriptors.addAll(locals);
                         }
                     }

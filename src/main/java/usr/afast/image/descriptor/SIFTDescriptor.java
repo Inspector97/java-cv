@@ -27,24 +27,25 @@ public class SIFTDescriptor extends AbstractDescriptor {
     private double[] descriptor;
     private InterestingPoint point;
 
-    public static List<SIFTDescriptor> at(Matrix gradient,
-                                          Matrix gradientAngle,
+    public static List<SIFTDescriptor> at(final Matrix gradient,
+                                          final Matrix gradientAngle,
                                           final InterestingPoint point,
                                           final int gridSize,
                                           final int cellSize,
                                           final int binsCount) {
-        return at(gradient, gradientAngle, point, gridSize, cellSize, binsCount, 1);
+        return at(gradient, gradientAngle, point, gridSize, cellSize, binsCount, 1, 1);
     }
 
-    public static List<SIFTDescriptor> at(Matrix gradient,
-                                          Matrix gradientAngle,
+    public static List<SIFTDescriptor> at(final Matrix gradient,
+                                          final Matrix gradientAngle,
                                           final InterestingPoint point,
                                           final int gridSize,
                                           final int cellSize,
                                           final int binsCount,
-                                          final int scale) {
+                                          final int scale,
+                                          final double sigma) {
         List<SIFTDescriptor> descriptorList = new LinkedList<>();
-        double[] mainAngles = getMainAngles(gradient, gradientAngle, point, gridSize, cellSize, scale);
+        double[] mainAngles = getMainAngles(gradient, gradientAngle, point, gridSize, cellSize, scale, sigma);
 
         for (double mainAngle : mainAngles) {
             SIFTDescriptor siftDescriptor = new SIFTDescriptor();
@@ -64,7 +65,7 @@ public class SIFTDescriptor extends AbstractDescriptor {
             int border = gridSize * cellSize;
             int halfBorder = border / 2;
 
-            SeparableMatrix gauss = separableMatrixFrom(getGaussMatrices(halfBorder, halfBorder / 2.0));
+            SeparableMatrix gauss = separableMatrixFrom(getGaussMatrices(halfBorder, halfBorder * sigma / 2.0));
             int left = -halfBorder, right = border - halfBorder;
 
             for (int x = left; x < right; x++) {
@@ -104,12 +105,8 @@ public class SIFTDescriptor extends AbstractDescriptor {
         int cellRadius = cellSize / 2;
         int cellCenterX = left + x * cellSize + cellRadius;
         int cellCenterY = left + y * cellSize + cellRadius;
-        int pointXSign = sign(realX - cellCenterX);
-        int pointYSign = sign(realY - cellCenterY);
-        if (pointXSign == 0 && pointYSign == 0) {
-            pointXSign = 1;
-            pointYSign = 1;
-        }
+        int pointXSign = sign((realX + 0.5) - cellCenterX);
+        int pointYSign = sign((realY + 0.5) - cellCenterY);
 
         Distribution[] distributions = new Distribution[4];
         int ptr = 0;
@@ -161,14 +158,15 @@ public class SIFTDescriptor extends AbstractDescriptor {
                                           final InterestingPoint point,
                                           final int gridSize,
                                           final int cellSize,
-                                          final int scale) {
-        final int binSize = 36;
+                                          final int scale,
+                                          final double sigma) {
+        final int binSize = 72;
         AngleBin bin = new AngleBin(binSize);
 
         int border = gridSize * cellSize;
         int halfBorder = border / 2;
 
-        SeparableMatrix gauss = separableMatrixFrom(getGaussMatrices(halfBorder));
+        SeparableMatrix gauss = separableMatrixFrom(getGaussMatrices(halfBorder, sigma));
 
         int actualX = (point.getX() / scale);
         int actualY = (point.getY() / scale);
