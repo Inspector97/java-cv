@@ -13,6 +13,7 @@ public class DescriptorUtil {
 
         for (AbstractDescriptor descriptorA : descriptorsA) {
             AbstractDescriptor closest = getClosest(descriptorA, descriptorsB);
+            if (closest == null) continue;
             AbstractDescriptor closestB = getClosest(closest, descriptorsA);
             if (closestB != descriptorA) continue;
             pointsMatching.add(PointsPair.from(descriptorA.getPoint(), closest.getPoint()));
@@ -27,7 +28,7 @@ public class DescriptorUtil {
         AbstractDescriptor selected = null;
         for (AbstractDescriptor patchDescriptor : descriptors) {
             double distance = AbstractDescriptor.distance(descriptor, patchDescriptor);
-            if (AbstractDescriptor.distance(descriptor, patchDescriptor) < min) {
+            if (distance < min) {
                 min = distance;
                 selected = patchDescriptor;
             }

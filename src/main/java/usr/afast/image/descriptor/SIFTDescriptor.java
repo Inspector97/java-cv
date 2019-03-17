@@ -1,6 +1,8 @@
 package usr.afast.image.descriptor;
 
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import usr.afast.image.enums.BorderHandling;
@@ -16,6 +18,8 @@ import java.util.List;
 
 import static usr.afast.image.math.ConvolutionMatrixFactory.getGaussMatrices;
 import static usr.afast.image.math.ConvolutionMatrixFactory.separableMatrixFrom;
+import static usr.afast.image.util.Math.sign;
+import static usr.afast.image.util.Math.sqr;
 
 @SuppressWarnings("Duplicates")
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -96,7 +100,52 @@ public class SIFTDescriptor extends AbstractDescriptor {
                                  double angle, double value) {
         int x = (realX - left) / cellSize;
         int y = (realY - left) / cellSize;
-        bins[x][y].addAngle(angle, value);
+
+        int cellRadius = cellSize / 2;
+        int cellCenterX = left + x * cellSize + cellRadius;
+        int cellCenterY = left + y * cellSize + cellRadius;
+        int pointXSign = sign(realX - cellCenterX);
+        int pointYSign = sign(realY - cellCenterY);
+        if (pointXSign == 0 && pointYSign == 0) {
+            pointXSign = 1;
+            pointYSign = 1;
+        }
+
+        Distribution[] distributions = new Distribution[4];
+        int ptr = 0;
+
+        int binsSize = bins.length;
+        double sum = 0;
+
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = -1; dy <= 1; dy++) {
+                if (x + dx < 0 || x + dx >= binsSize || y + dy < 0 || y + dy >= binsSize)
+                    continue;
+                if (dx * pointXSign >= 0 && dy * pointYSign >= 0) {
+                    int neighbourX = left + (x + dx) * cellSize + cellRadius;
+                    int neighbourY = left + (y + dy) * cellSize + cellRadius;
+
+                    double distance = Math.sqrt(sqr(neighbourX - (realX + 0.5)) + sqr(neighbourY - (realY + 0.5)));
+
+                    distributions[ptr++] = new Distribution(x + dx, y + dy, distance);
+                    sum += distance;
+                }
+            }
+        }
+
+        for (int i = 0; i < ptr; i++) {
+            bins[distributions[i].x][distributions[i].y].addAngle(angle,
+                                                                  value * (1 - distributions[i].distance / sum));
+        }
+
+//        bins[x][y].addAngle(angle, value);
+    }
+
+    @AllArgsConstructor
+    @Getter
+    private static class Distribution {
+        private int x, y;
+        private double distance;
     }
 
     private static int rotateX(int x, int y, double angle) {

@@ -84,7 +84,7 @@ public class BlobFinder {
                         }
 
                         if ((okMax || okMin) && harrisValue > MIN_HARRIS) {
-                            System.out.println(harrisValue + " " + pixel);
+//                            System.out.println(harrisValue + " " + pixel);
                             InterestingPoint at = InterestingPoint.at(x * pow + pow / 2,
                                                                       y * pow + pow / 2,
                                                                       pixel * 100,
