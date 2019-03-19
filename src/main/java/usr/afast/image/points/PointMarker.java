@@ -68,18 +68,18 @@ public class PointMarker {
 
         int radius = 2;
         graphics.setStroke(new BasicStroke(2));
-        for (PointsPair pointsPair : matching.getPointsPairs()) {
-            int xA = pointsPair.getPointA().getX() - radius;
-            int yA = pointsPair.getPointA().getY() - radius;
-            graphics.setColor(getSpectrum(pointsPair.getPointA().getProbability()));
-            graphics.drawOval(xA, yA, 2 * radius, 2 * radius);
-
-            int xB = pointsPair.getPointB().getX() - radius + imageA.getWidth();
-            int yB = pointsPair.getPointB().getY() - radius;
-            graphics.drawOval(xB, yB, 2 * radius, 2 * radius);
-
-            graphics.drawLine(xA + radius, yA + radius, xB + radius, yB + radius);
-        }
+//        for (PointsPair pointsPair : matching.getPointsPairs()) {
+//            int xA = pointsPair.getPointA().getX() - radius;
+//            int yA = pointsPair.getPointA().getY() - radius;
+//            graphics.setColor(getSpectrum(pointsPair.getPointA().getProbability()));
+//            graphics.drawOval(xA, yA, 2 * radius, 2 * radius);
+//
+//            int xB = pointsPair.getPointB().getX() - radius + imageA.getWidth();
+//            int yB = pointsPair.getPointB().getY() - radius;
+//            graphics.drawOval(xB, yB, 2 * radius, 2 * radius);
+//
+//            graphics.drawLine(xA + radius, yA + radius, xB + radius, yB + radius);
+//        }
 
         graphics.dispose();
 

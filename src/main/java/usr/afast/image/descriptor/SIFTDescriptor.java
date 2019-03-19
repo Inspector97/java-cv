@@ -70,8 +70,8 @@ public class SIFTDescriptor extends AbstractDescriptor {
 
             for (int x = left; x < right; x++) {
                 for (int y = left; y < right; y++) {
-                    int rotatedX = rotateX(x, y, mainAngle);
-                    int rotatedY = rotateY(x, y, mainAngle);
+                    double rotatedX = rotateX(x, y, mainAngle);
+                    double rotatedY = rotateY(x, y, mainAngle);
 
                     if (rotatedX < left || rotatedX >= right || rotatedY < left || rotatedY >= right) continue;
 
@@ -79,7 +79,7 @@ public class SIFTDescriptor extends AbstractDescriptor {
                     int realY = actualY + y;
                     double phi = gradientAngle.getAt(realX, realY, BorderHandling.Mirror);
                     double gradientValue = gradient.getAt(realX, realY, BorderHandling.Mirror);
-                    double gaussValue = gauss.getAt(halfBorder + rotatedX, halfBorder + rotatedY);
+                    double gaussValue = gauss.getAt((int) (halfBorder + rotatedX), (int) (halfBorder + rotatedY));
 
                     putToBin(bins, rotatedX, rotatedY, left, cellSize, phi + mainAngle, gradientValue * gaussValue);
                 }
@@ -97,16 +97,16 @@ public class SIFTDescriptor extends AbstractDescriptor {
         return descriptorList;
     }
 
-    private static void putToBin(@NotNull AngleBin[][] bins, int realX, int realY, int left, int cellSize,
+    private static void putToBin(@NotNull AngleBin[][] bins, double realX, double realY, int left, int cellSize,
                                  double angle, double value) {
-        int x = (realX - left) / cellSize;
-        int y = (realY - left) / cellSize;
+        int x = (int) ((realX - left) / cellSize);
+        int y = (int) ((realY - left) / cellSize);
 
-        int cellRadius = cellSize / 2;
-        int cellCenterX = left + x * cellSize + cellRadius;
-        int cellCenterY = left + y * cellSize + cellRadius;
-        int pointXSign = sign((realX + 0.5) - cellCenterX);
-        int pointYSign = sign((realY + 0.5) - cellCenterY);
+        double cellRadius = cellSize / 2D;
+        double cellCenterX = left + x * cellSize + cellRadius;
+        double cellCenterY = left + y * cellSize + cellRadius;
+        int pointXSign = sign(realX - cellCenterX);
+        int pointYSign = sign(realY - cellCenterY);
 
         Distribution[] distributions = new Distribution[4];
         int ptr = 0;
@@ -119,10 +119,10 @@ public class SIFTDescriptor extends AbstractDescriptor {
                 if (x + dx < 0 || x + dx >= binsSize || y + dy < 0 || y + dy >= binsSize)
                     continue;
                 if (dx * pointXSign >= 0 && dy * pointYSign >= 0) {
-                    int neighbourX = left + (x + dx) * cellSize + cellRadius;
-                    int neighbourY = left + (y + dy) * cellSize + cellRadius;
+                    double neighbourX = left + (x + dx) * cellSize + cellRadius;
+                    double neighbourY = left + (y + dy) * cellSize + cellRadius;
 
-                    double distance = Math.sqrt(sqr(neighbourX - (realX + 0.5)) + sqr(neighbourY - (realY + 0.5)));
+                    double distance = Math.sqrt(sqr(neighbourX - realX) + sqr(neighbourY - realY));
 
                     distributions[ptr++] = new Distribution(x + dx, y + dy, distance);
                     sum += distance;
@@ -134,8 +134,6 @@ public class SIFTDescriptor extends AbstractDescriptor {
             bins[distributions[i].x][distributions[i].y].addAngle(angle,
                                                                   value * (1 - distributions[i].distance / sum));
         }
-
-//        bins[x][y].addAngle(angle, value);
     }
 
     @AllArgsConstructor
@@ -145,12 +143,12 @@ public class SIFTDescriptor extends AbstractDescriptor {
         private double distance;
     }
 
-    private static int rotateX(int x, int y, double angle) {
-        return (int) (x * Math.cos(angle) + y * Math.sin(angle));
+    private static double rotateX(int x, int y, double angle) {
+        return (x * Math.cos(angle) + y * Math.sin(angle));
     }
 
-    private static int rotateY(int x, int y, double angle) {
-        return (int) (y * Math.cos(angle) - x * Math.sin(angle));
+    private static double rotateY(int x, int y, double angle) {
+        return (y * Math.cos(angle) - x * Math.sin(angle));
     }
 
     private static double[] getMainAngles(Matrix gradient,
