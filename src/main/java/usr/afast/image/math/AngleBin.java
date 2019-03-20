@@ -1,8 +1,12 @@
 package usr.afast.image.math;
 
 import lombok.Getter;
+import org.apache.commons.math3.util.Pair;
 import org.jetbrains.annotations.Contract;
 import usr.afast.image.wrapped.Matrix;
+
+import java.util.LinkedList;
+import java.util.List;
 
 @Getter
 public class AngleBin {
@@ -43,33 +47,45 @@ public class AngleBin {
         return angle;
     }
 
-    public double[] getPeeks() {
-        double[] result = new double[1];
-        double max = Double.MIN_VALUE;
-        double angle = -1;
-        for (int i = 0; i < size; i++) {
-            if (max < bin[i]) {
-                max = bin[i];
-                angle = (i + 0.5) * step;
-            }
-        }
-        result[0] = angle;
+    public Double[] getPeeks() {
+        List<Pair<Integer, Double>> values = new LinkedList<>();
 
-        double bord = max * 0.8;
-        double secondMax = Double.MIN_VALUE;
         for (int i = 0; i < size; i++) {
-            if (bin[i] > bord && bin[i] != max && bin[i] > secondMax) {
-                secondMax = bin[i];
-                angle = (i + 0.5) * step;
-            }
-        }
-        if (secondMax != Double.MIN_VALUE) {
-            double tmp = result[0];
-            result = new double[2];
-            result[0] = tmp;
-            result[1] = angle;
+            values.add(new Pair<>(i, bin[i]));
         }
 
-        return result;
+        values.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
+
+        List<Double> result = new LinkedList<>();
+
+        for (int i = 0; i < 2; i++) {
+            if (i == 1) {
+                if (values.get(i).getValue() < result.get(0) * 0.8)
+                    break;
+            }
+            int idx = values.get(i).getKey();
+            double x = values.get(i).getKey() + 0.5;
+            int prevIdx = (idx - 1 + size) % size;
+            double prevX = x - 1;
+            int nextIdx = (idx + 1) % size;
+            double nextX = x + 1;
+
+            double value = bin[idx];
+            double prevValue = bin[prevIdx];
+            double nextValue = bin[nextIdx];
+
+            result.add(normalize(getRealPeek(prevX, prevValue, x, value, nextX, nextValue) * step));
+
+        }
+
+        return result.toArray(new Double[0]);
+    }
+
+    @Contract(pure = true)
+    private double getRealPeek(double x1, double y1, double x2, double y2, double x3, double y3) {
+        double a = (y3 - (x3 * (y2 - y1) + x2 * y1 - x1 * y2) / (x2 - x1)) /
+                   (x3 * (x3 - x1 - x2) + x1 * x2);
+        double b = (y2 - y1) / (x2 - x1) - a * (x1 + x2);
+        return -b / (2 * a);
     }
 }

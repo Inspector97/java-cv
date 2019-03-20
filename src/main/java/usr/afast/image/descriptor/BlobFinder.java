@@ -24,7 +24,7 @@ import static usr.afast.image.util.ImageIO.write;
 public class BlobFinder {
     private static final double INIT_SIGMA = 0.5;
     private static final double START_SIGMA = 1;
-    private static final int OCTAVE_SIZE = 6;
+    private static final int OCTAVE_SIZE = 4;
     private static final double EPS = 1e-4;
     private static final double MIN_HARRIS = 0.01;
 

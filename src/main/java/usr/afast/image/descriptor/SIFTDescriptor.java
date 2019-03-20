@@ -11,8 +11,6 @@ import usr.afast.image.points.InterestingPoint;
 import usr.afast.image.util.SeparableMatrix;
 import usr.afast.image.wrapped.Matrix;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -43,7 +41,7 @@ public class SIFTDescriptor extends AbstractDescriptor {
                                           final int gridSize,
                                           final int binsCount) {
         List<SIFTDescriptor> descriptorList = new LinkedList<>();
-        double[] mainAngles = getMainAngles(gradient, gradientAngle, point, gridSize);
+        Double[] mainAngles = getMainAngles(gradient, gradientAngle, point, gridSize);
 
         for (double mainAngle : mainAngles) {
             SIFTDescriptor siftDescriptor = new SIFTDescriptor();
@@ -147,7 +145,7 @@ public class SIFTDescriptor extends AbstractDescriptor {
         return (y * Math.cos(angle) - x * Math.sin(angle));
     }
 
-    private static double[] getMainAngles(Matrix gradient,
+    private static Double[] getMainAngles(Matrix gradient,
                                           Matrix gradientAngle,
                                           final InterestingPoint point,
                                           final int gridSize) {
@@ -176,7 +174,7 @@ public class SIFTDescriptor extends AbstractDescriptor {
             }
         }
 
-        double[] peeks = bin.getPeeks();
+        Double[] peeks = bin.getPeeks();
         for (int i = 0; i < peeks.length; i++)
             peeks[i] = 2 * Math.PI - peeks[i];
 
