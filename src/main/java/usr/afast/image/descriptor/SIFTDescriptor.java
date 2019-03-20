@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import usr.afast.image.enums.BorderHandling;
 import usr.afast.image.math.AngleBin;
+import usr.afast.image.math.GaussCalculator;
 import usr.afast.image.points.InterestingPoint;
 import usr.afast.image.util.SeparableMatrix;
 import usr.afast.image.wrapped.Matrix;
@@ -57,7 +58,7 @@ public class SIFTDescriptor extends AbstractDescriptor {
             int border = (int) Math.ceil(point.getScale() * SQRT_2 * 2);
             int halfBorder = border / 2;
 
-            SeparableMatrix gauss = separableMatrixFrom(getGaussMatrices(halfBorder, 0.5 * halfBorder));
+            GaussCalculator gauss = new GaussCalculator(0.5 * halfBorder);
             int left = -halfBorder, right = border - halfBorder;
 
             double cellSize = border * 1.0 / gridSize;
@@ -69,11 +70,13 @@ public class SIFTDescriptor extends AbstractDescriptor {
 
                     if (rotatedX < left || rotatedX >= right || rotatedY < left || rotatedY >= right) continue;
 
-                    int realX = (int) (point.getScaledX() + x);
-                    int realY = (int) (point.getScaledY() + y);
-                    double phi = gradientAngle.getAt(realX, realY, BorderHandling.Mirror);
-                    double gradientValue = gradient.getAt(realX, realY, BorderHandling.Mirror);
-                    double gaussValue = gauss.getAt((int) (halfBorder + rotatedX), (int) (halfBorder + rotatedY));
+                    double phi = gradientAngle.getAt((int) (point.getScaledX() + x),
+                                                     (int) (point.getScaledY() + y),
+                                                     BorderHandling.Mirror);
+                    double gradientValue = gradient.getAt((int) (point.getScaledX() + x),
+                                                          (int) (point.getScaledY() + y),
+                                                          BorderHandling.Mirror);
+                    double gaussValue = gauss.get(x, y);
 
                     putToBin(bins, rotatedX, rotatedY, left, cellSize, phi + mainAngle, gradientValue * gaussValue);
                 }
@@ -157,7 +160,7 @@ public class SIFTDescriptor extends AbstractDescriptor {
         int border = (int) Math.ceil(radius * 2);
         int halfBorder = border / 2;
 
-        SeparableMatrix gauss = separableMatrixFrom(getGaussMatrices(halfBorder, 1.5 * point.getScale()));
+        GaussCalculator gauss = new GaussCalculator(1.5 * point.getScale());
 
         int actualX = (int) point.getScaledX();
         int actualY = (int) point.getScaledY();
@@ -168,7 +171,7 @@ public class SIFTDescriptor extends AbstractDescriptor {
                 int realY = actualY + y;
                 double phi = gradientAngle.getAt(realX, realY, BorderHandling.Mirror);
                 double gradientValue = gradient.getAt(realX, realY, BorderHandling.Mirror);
-                double gaussValue = gauss.getAt(halfBorder + x, halfBorder + y);
+                double gaussValue = gauss.get(x, y);
 
                 bin.addAngle(phi, gradientValue * gaussValue);
             }

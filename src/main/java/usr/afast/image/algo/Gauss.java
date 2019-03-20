@@ -16,7 +16,7 @@ public class Gauss implements Algorithm {
     public void process(String path, String... args) {
         final BorderHandling borderHandling = getBorderHandling(0, args);
         double sigma = getDouble(1, args);
-        System.out.println(String.format("Gauss with sigma %.3f", sigma));
+        System.out.println(String.format("GaussCalculator with sigma %.3f", sigma));
         BufferedImage image = read(path);
         Matrix matrix = Matrix.of(image);
         write(getSaveFilePath(path, "original"), Matrix.save(matrix));
