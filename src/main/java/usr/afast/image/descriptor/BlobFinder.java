@@ -69,34 +69,37 @@ public class BlobFinder {
                         double harrisValue = harris.getAt(x, y);
                         for (int dx = -1; dx <= 1; dx++) {
                             for (int dy = -1; dy <= 1; dy++) {
-                                okMax &= pixel > prev.getAt(x + dx, y + dy, BorderHandling.Mirror) ;
-                                okMin &= pixel < prev.getAt(x + dx, y + dy, BorderHandling.Mirror) ;
-                                okMax &= pixel > next.getAt(x + dx, y + dy, BorderHandling.Mirror) ;
-                                okMin &= pixel < next.getAt(x + dx, y + dy, BorderHandling.Mirror) ;
+                                okMax &= pixel > prev.getAt(x + dx, y + dy, BorderHandling.Mirror);
+                                okMin &= pixel < prev.getAt(x + dx, y + dy, BorderHandling.Mirror);
+                                okMax &= pixel > next.getAt(x + dx, y + dy, BorderHandling.Mirror);
+                                okMin &= pixel < next.getAt(x + dx, y + dy, BorderHandling.Mirror);
 
                                 if (dx != 0 || dy != 0) {
-                                    okMax &= pixel > cur.getAt(x + dx, y + dy, BorderHandling.Mirror) ;
-                                    okMin &= pixel < cur.getAt(x + dx, y + dy, BorderHandling.Mirror) ;
+                                    okMax &= pixel > cur.getAt(x + dx, y + dy, BorderHandling.Mirror);
+                                    okMin &= pixel < cur.getAt(x + dx, y + dy, BorderHandling.Mirror);
                                 }
                             }
                         }
 
                         if ((okMax || okMin) && harrisValue > MIN_HARRIS) {
+
+                            double scaledX = x + 0.5;
+                            double scaledY = y + 0.5;
+
 //                            System.out.println(harrisValue + " " + pixel);
-                            InterestingPoint at = InterestingPoint.at(x * pow + pow / 2,
-                                                                      y * pow + pow / 2,
+                            InterestingPoint at = InterestingPoint.at(scaledX * pow,
+                                                                      scaledY * pow,
                                                                       pixel * 100,
-                                                                      layers.get(j).getGlobalSigma() * sqrt2,
-                                                                      0);
+                                                                      layers.get(j).getLocalSigma(),
+                                                                      layers.get(j).getGlobalSigma(),
+                                                                      scaledX,
+                                                                      scaledY);
                             List<SIFTDescriptor> locals =
                                     SIFTDescriptor.at(gradient,
                                                       gradientAngle,
                                                       at,
                                                       4,
-                                                      (int) Math.ceil(layers.get(j).getLocalSigma() * sqrt2 / 2),
-                                                      8,
-                                                      pow,
-                                                      layers.get(j).getLocalSigma() / INIT_SIGMA);
+                                                      8);
                             descriptors.addAll(locals);
                         }
                     }

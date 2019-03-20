@@ -28,8 +28,8 @@ public class PatchDescriptor extends AbstractDescriptor {
 
                 for (int pixelX = -cellHalfSize; pixelX <= cellHalfSize; pixelX++) {
                     for (int pixelY = -cellHalfSize; pixelY <= cellHalfSize; pixelY++) {
-                        int realX = point.getX() + cellX * cellSize + pixelX;
-                        int realY = point.getY() + cellY * cellSize + pixelY;
+                        int realX = (int) (point.getOriginalX() + cellX * cellSize + pixelX);
+                        int realY = (int) (point.getOriginalY() + cellY * cellSize + pixelY);
 
                         sum += gradient.getAt(realX, realY, BorderHandling.Mirror);
                     }

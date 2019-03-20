@@ -45,8 +45,8 @@ public class HOGDescriptor extends AbstractDescriptor {
 
         for (int x = left; x < right; x++) {
             for (int y = left; y < right; y++) {
-                int realX = point.getX() + x;
-                int realY = point.getY() + y;
+                int realX = (int) (point.getOriginalX() + x);
+                int realY = (int) (point.getOriginalY() + y);
                 double phi = gradientAngle.getAt(realX, realY, BorderHandling.Mirror);
                 double gradientValue = gradient.getAt(realX, realY, BorderHandling.Mirror);
                 double gaussValue = gauss.getAt(halfBorder + x, halfBorder + y);

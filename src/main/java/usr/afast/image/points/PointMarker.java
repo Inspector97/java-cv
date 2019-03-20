@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 public class PointMarker {
     private static final double SPECTRUM_OFFSET = 180D / 255;
+    private static final double SQRT_2 = Math.sqrt(2);
 
     public static BufferedImage markPoints(@NotNull List<InterestingPoint> interestingPoints, Matrix image) {
         return markPoints(interestingPoints, Matrix.save(image));
@@ -24,9 +25,9 @@ public class PointMarker {
         graphics.drawImage(image, 0, 0, null);
         graphics.setStroke(new BasicStroke(1));
         for (InterestingPoint interestingPoint : interestingPoints) {
-            int radius = (int) interestingPoint.getRadius();
-            int x = interestingPoint.getX() - radius;
-            int y = interestingPoint.getY() - radius;
+            int radius = (int) (interestingPoint.getOriginalScale() * SQRT_2);
+            int x = (int) (interestingPoint.getOriginalX() - radius);
+            int y = (int) (interestingPoint.getOriginalY() - radius);
             graphics.setColor(getSpectrum(interestingPoint.getProbability()));
             graphics.drawOval(x, y, 2 * radius, 2 * radius);
 
@@ -35,8 +36,8 @@ public class PointMarker {
             int dx = (int) (Math.cos(angle) * 10);
             int dy = (int) (Math.sin(angle) * 10);
 
-            graphics.drawLine(interestingPoint.getX(), interestingPoint.getY(),
-                              interestingPoint.getX() + dx, interestingPoint.getY() + dy);
+            graphics.drawLine((int) interestingPoint.getOriginalX(), (int) interestingPoint.getOriginalY(),
+                              (int) interestingPoint.getOriginalX() + dx, (int) interestingPoint.getOriginalY() + dy);
 
         }
         graphics.dispose();
@@ -68,18 +69,18 @@ public class PointMarker {
 
         int radius = 2;
         graphics.setStroke(new BasicStroke(2));
-//        for (PointsPair pointsPair : matching.getPointsPairs()) {
-//            int xA = pointsPair.getPointA().getX() - radius;
-//            int yA = pointsPair.getPointA().getY() - radius;
-//            graphics.setColor(getSpectrum(pointsPair.getPointA().getProbability()));
-//            graphics.drawOval(xA, yA, 2 * radius, 2 * radius);
-//
-//            int xB = pointsPair.getPointB().getX() - radius + imageA.getWidth();
-//            int yB = pointsPair.getPointB().getY() - radius;
-//            graphics.drawOval(xB, yB, 2 * radius, 2 * radius);
-//
-//            graphics.drawLine(xA + radius, yA + radius, xB + radius, yB + radius);
-//        }
+        for (PointsPair pointsPair : matching.getPointsPairs()) {
+            int xA = (int) (pointsPair.getPointA().getOriginalX() - radius);
+            int yA = (int) (pointsPair.getPointA().getOriginalY() - radius);
+            graphics.setColor(getSpectrum(pointsPair.getPointA().getProbability()));
+            graphics.drawOval(xA, yA, 2 * radius, 2 * radius);
+
+            int xB = (int) (pointsPair.getPointB().getOriginalX() - radius + imageA.getWidth());
+            int yB = (int) (pointsPair.getPointB().getOriginalY() - radius);
+            graphics.drawOval(xB, yB, 2 * radius, 2 * radius);
+
+            graphics.drawLine(xA + radius, yA + radius, xB + radius, yB + radius);
+        }
 
         graphics.dispose();
 

@@ -19,18 +19,18 @@ public class SiftAlgo implements Algorithm {
         int gridSize = getInt(1, args);
         int cellSize = getInt(2, args);
         int binCount = getInt(3, args);
-        GistogramBasedDescriptor descriptor = (gradient, gradientAngle, interestingPoint) ->
-                SIFTDescriptor.at(gradient,
-                                  gradientAngle,
-                                  interestingPoint,
-                                  gridSize,
-                                  cellSize,
-                                  binCount);
-        ToDraw matching = Stopwatch.measure(() -> HOGProcessor.process(imageA, imageB, descriptor));
-
-        BufferedImage result = markMatching(imageA, imageB, matching);
-        write(getSaveFilePath(path, "SIFT_MATCHING"), result);
-
-        System.out.println("Matched " + matching.getPointsPairs().size());
+//        GistogramBasedDescriptor descriptor = (gradient, gradientAngle, interestingPoint) ->
+//                SIFTDescriptor.at(gradient,
+//                                  gradientAngle,
+//                                  interestingPoint,
+//                                  gridSize,
+//                                  cellSize,
+//                                  binCount);
+//        ToDraw matching = Stopwatch.measure(() -> HOGProcessor.process(imageA, imageB, descriptor));
+//
+//        BufferedImage result = markMatching(imageA, imageB, matching);
+//        write(getSaveFilePath(path, "SIFT_MATCHING"), result);
+//
+//        System.out.println("Matched " + matching.getPointsPairs().size());
     }
 }
