@@ -84,7 +84,7 @@ public class AngleBin {
     @Contract(pure = true)
     private double getRealPeek(double x1, double y1, double x2, double y2, double x3, double y3) {
         double a = (y3 - (x3 * (y2 - y1) + x2 * y1 - x1 * y2) / (x2 - x1)) /
-                   (x3 * (x3 - x1 - x2) + x1 * x2);
+                (x3 * (x3 - x1 - x2) + x1 * x2);
         double b = (y2 - y1) / (x2 - x1) - a * (x1 + x2);
         return -b / (2 * a);
     }

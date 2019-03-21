@@ -13,18 +13,18 @@ public class ConvolutionMatrixFactory {
     private static final double[][] SOBEL_A_VECTOR = {{1, 2, 1}};
     private static final double[][] PRUITT_A_VERCTOR = {{1, 1, 1}};
     private static final double[][] SCHARR_A_VERCTOR = {{3, 10, 3}};
-    private static final double[][] BORDER_B_VECTOR = {{1, 0, -1}};
+    private static final double[][] BORDER_B_VECTOR = {{-1, 0, 1}};
 
     @Contract(" -> new")
     @NotNull
     public static Matrix[] getSobelXMatrices() {
-        return new Matrix[]{Matrix.of(SOBEL_A_VECTOR), Matrix.transform(Matrix.of(BORDER_B_VECTOR))};
+        return new Matrix[]{Matrix.of(BORDER_B_VECTOR), Matrix.transform(Matrix.of(SOBEL_A_VECTOR))};
     }
 
     @Contract(" -> new")
     @NotNull
     public static Matrix[] getSobelYMatrices() {
-        return new Matrix[]{Matrix.of(BORDER_B_VECTOR), Matrix.transform(Matrix.of(SOBEL_A_VECTOR))};
+        return new Matrix[]{Matrix.of(SOBEL_A_VECTOR), Matrix.transform(Matrix.of(BORDER_B_VECTOR))};
     }
 
     @Contract(" -> new")

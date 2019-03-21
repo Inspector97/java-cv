@@ -25,7 +25,7 @@ import static usr.afast.image.util.ImageIO.write;
 public class BlobFinder {
     private static final double INIT_SIGMA = 0.5;
     private static final double START_SIGMA = 1.6;
-    private static final int OCTAVE_SIZE = 6;
+    private static final int OCTAVE_SIZE = 4;
     private static final double EPS = 1e-4;
     private static final double MIN_HARRIS = 0.01;
 
@@ -50,8 +50,8 @@ public class BlobFinder {
 
             Matrix xImage = getSobelX(startImage, BorderHandling.Mirror);
             Matrix yImage = getSobelY(startImage, BorderHandling.Mirror);
-            ImageIO.write(getSaveFilePath("E:\\test_images\\cat\\temp\\layer.png", i+"" ),
-                          Matrix.save(startImage));
+//            ImageIO.write(getSaveFilePath("E:\\GitHub\\java-cv\\images\\cats\\temp\\layer.png", i+"" ),
+//                          Matrix.save(startImage));
 
             Matrix gradient = Matrix.getGradient(xImage, yImage);
             Matrix gradientAngle = Matrix.getGradientAngle(xImage, yImage);
@@ -62,8 +62,8 @@ public class BlobFinder {
 
                 int radius = (int) (layers.get(j).getLocalSigma() * sqrt2);
                 Matrix harris = getHarrisMat(startImage, radius);
-                ImageIO.write(getSaveFilePath("E:\\test_images\\cat\\temp\\harris.png", i + "_" + j),
-                              Matrix.save(harris));
+//                ImageIO.write(getSaveFilePath("E:\\GitHub\\java-cv\\images\\cats\\temp\\harris.png", i + "_" + j),
+//                              Matrix.save(harris));
 
                 for (int x = 0; x < cur.getWidth(); x++) {
                     for (int y = 0; y < cur.getHeight(); y++) {
@@ -91,6 +91,8 @@ public class BlobFinder {
                             double scaledX = x + 0.5;
                             double scaledY = y + 0.5;
 
+                            double size = INIT_SIGMA * Math.pow(2, i + j * 1D / OCTAVE_SIZE + 1);
+
 //                            System.out.println(harrisValue + " " + pixel);
                             InterestingPoint at = InterestingPoint.at(scaledX * pow,
                                                                       scaledY * pow,
@@ -103,8 +105,8 @@ public class BlobFinder {
                                     SIFTDescriptor.at(gradient,
                                                       gradientAngle,
                                                       at,
-                                                      8,
-                                                      16);
+                                                      4,
+                                                      8);
                             descriptors.addAll(locals);
                         }
                     }
