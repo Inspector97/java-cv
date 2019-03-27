@@ -25,7 +25,6 @@ import static usr.afast.image.util.Math.sqr;
 @SuppressWarnings("Duplicates")
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class SIFTDescriptor extends AbstractDescriptor {
-    private static final double SQRT_2 = Math.sqrt(2);
     private double[] descriptor;
     private InterestingPoint point;
     private static int ptr = 0;
@@ -58,52 +57,58 @@ public class SIFTDescriptor extends AbstractDescriptor {
 
             siftDescriptor.point = point.toBuilder().build().setAngle(mainAngle);
 
-            int border = (int) Math.round(point.getScale() * 3 * 2 + 1);
+            double scale = point.getScale() / Math.pow(2, point.getOctave() + 1);
+
+            int border = (int) Math.round(scale * 3) * 2 + 1;
             System.out.println("bbbborder = " + border);
             int halfBorder = border / 2;
 
-            GaussCalculator gauss = new GaussCalculator(0.5 * halfBorder);
+            GaussCalculator gauss = new GaussCalculator(3 * scale);
             int left = -halfBorder, right = border - halfBorder;
 
             double cellSize = border * 1.0 / gridSize;
             System.out.println(border);
-            boolean drawing = border == 8;
+            boolean drawing = border >= 8;
             Matrix temp1 = new Matrix(border, border);
             Matrix temp2 = new Matrix(border, border);
             Matrix temp3 = new Matrix(border, border);
+
+            int centerX = point.getX() >> point.getOctave();
+            int centerY = point.getY() >> point.getOctave();
+
             for (int x = left; x < right; x++) {
                 for (int y = left; y < right; y++) {
-                    double rotatedX = rotateX(x, y, mainAngle);
-                    double rotatedY = rotateY(x, y, mainAngle);
+                    double rotatedX = rotateX(x, y, -mainAngle);
+                    double rotatedY = rotateY(x, y, -mainAngle);
 
-                    temp2.setAt(x - left, y - left, gradient.getAt((int) (point.getScaledX() + x),
-                            (int) (point.getScaledY() + y),
-                            BorderHandling.Mirror));
+//                    temp2.setAt(x - left, y - left, gradient.getAt((int) (centerX + x),
+//                                                                   (int) (centerY + y),
+//                                                                   BorderHandling.Mirror));
                     if (rotatedX < left || rotatedX >= right || rotatedY < left || rotatedY >= right) continue;
 //
-                    temp1.setAt((int) (rotatedX - left), (int) (rotatedY - left), gradient.getAt((int) (point.getScaledX() + x),
-                            (int) (point.getScaledY() + y),
-                            BorderHandling.Mirror));
-                    temp3.setAt(x - left, y - left, gauss.get(x, y));
+//                    temp1.setAt((int) (rotatedX - left), (int) (rotatedY - left), gradient.getAt((int) (centerX + x),
+//                                                                                                 (int) (centerY + y),
+//                                                                                                 BorderHandling.Mirror));
+//                    temp3.setAt(x - left, y - left, gauss.get(x, y));
 
-                    double phi = gradientAngle.getAt((int) (point.getScaledX() + x),
-                            (int) (point.getScaledY() + y),
-                            BorderHandling.Mirror);
-                    double gradientValue = gradient.getAt((int) (point.getScaledX() + x),
-                            (int) (point.getScaledY() + y),
-                            BorderHandling.Mirror);
+                    double phi = gradientAngle.getAt((int) (centerX + x),
+                                                     (int) (centerY + y),
+                                                     BorderHandling.Mirror);
+                    double gradientValue = gradient.getAt((int) (centerX + x),
+                                                          (int) (centerY + y),
+                                                          BorderHandling.Mirror);
                     double gaussValue = gauss.get(x, y);
 
                     putToBin(bins, rotatedX, rotatedY, left, cellSize, phi + mainAngle, gradientValue * gaussValue);
                 }
             }
-            if (drawing) {
-                ptr++;
-                System.out.println("angle = " + Math.toDegrees(mainAngle));
-                write(getSaveFilePath("E:\\GitHub\\java-cv\\images\\cats\\tempp\\temp.png", "rot_" + ptr), Matrix.save(temp1));
-                write(getSaveFilePath("E:\\GitHub\\java-cv\\images\\cats\\tempp\\temp.png", "not_rot_" + ptr), Matrix.save(temp2));
-                write(getSaveFilePath("E:\\GitHub\\java-cv\\images\\cats\\tempp\\temp.png", "gauss_" + ptr), Matrix.save(temp3));
-            }
+//            if (drawing) {
+//                ptr++;
+//                System.out.println("angle = " + Math.toDegrees(mainAngle));
+//                write(getSaveFilePath("E:\\test_images\\cat\\tempp\\temp.png", "rot_" + ptr), Matrix.save(temp1));
+//                write(getSaveFilePath("E:\\test_images\\cat\\tempp\\temp.png", "not_rot_" + ptr), Matrix.save(temp2));
+//                write(getSaveFilePath("E:\\test_images\\cat\\tempp\\temp.png", "gauss_" + ptr), Matrix.save(temp3));
+//            }
             int ptr = 0;
             for (int i = 0; i < gridSize; i++) {
                 for (int j = 0; j < gridSize; j++) {
@@ -152,7 +157,7 @@ public class SIFTDescriptor extends AbstractDescriptor {
 
         for (int i = 0; i < ptr; i++) {
             bins[distributions[i].x][distributions[i].y].addAngle(angle,
-                    value * (1 - distributions[i].distance / sum));
+                                                                  value * (1 - distributions[i].distance / sum));
         }
     }
 
@@ -177,15 +182,16 @@ public class SIFTDescriptor extends AbstractDescriptor {
                                           final int gridSize) {
         final int binSize = 36;
         AngleBin bin = new AngleBin(binSize);
+        double scale = point.getScale() / Math.pow(2, point.getOctave() + 1);
 
-        int border = (int) Math.round(point.getScale() * 3 * 2 + 1);
+        int border = (int) Math.round(scale * 3) * 2 + 1;
         System.out.println("border = " + border);
         int halfBorder = border / 2;
 
-        GaussCalculator gauss = new GaussCalculator(0.8 * point.getScale());
+        GaussCalculator gauss = new GaussCalculator(1.5 * scale);
 
-        int actualX = (int) point.getScaledX();
-        int actualY = (int) point.getScaledY();
+        int actualX = point.getX() >> point.getOctave();
+        int actualY = point.getY() >> point.getOctave();
 
         for (int x = -halfBorder; x < border - halfBorder; x++) {
             for (int y = -halfBorder; y < border - halfBorder; y++) {

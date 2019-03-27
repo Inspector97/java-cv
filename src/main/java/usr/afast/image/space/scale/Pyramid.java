@@ -30,6 +30,7 @@ public class Pyramid {
     private int octaveSize;
     private Matrix original;
     private List<Octave> octaves;
+    private List<List<OctaveLayer>> DoGs;
     private Octave minusFirstOctave;
 
     public static Pyramid build(Matrix image, double initSigma, double startSigma, int octaveSize) {
@@ -56,7 +57,31 @@ public class Pyramid {
             pyramid.depth++;
         }
 
+        pyramid.initDoGs();
+
         return pyramid;
+    }
+
+    private void initDoGs() {
+        DoGs = new ArrayList<>(depth);
+        for (int index = 0; index < depth; index++) {
+            Octave previous = getByIndex(index - 1);
+            Octave current = getByIndex(index);
+            List<OctaveLayer> gaussians = new ArrayList<>(octaveSize + 4);
+            gaussians.add(downSample(previous.getImages().get(octaveSize - 2)));
+            gaussians.add(downSample(previous.getImages().get(octaveSize - 1)));
+            for (int i = 0; i < octaveSize + 2; i++)
+                gaussians.add(current.getImages().get(i));
+
+            List<OctaveLayer> DoGs = new ArrayList<>(octaveSize + 2);
+            for (int i = 1; i < octaveSize + 4; i++) {
+                OctaveLayer cur = gaussians.get(i);
+                OctaveLayer prev = gaussians.get(i - 1);
+                Matrix delta = Matrix.subtract(cur.getImage(), prev.getImage());
+                DoGs.add(new OctaveLayer(i - 1, cur.getLocalSigma(), cur.getGlobalSigma(), delta));
+            }
+            this.DoGs.add(DoGs);
+        }
     }
 
     private static Matrix makeFirstImage(Matrix original, double initSigma, double startSigma) {
@@ -77,22 +102,7 @@ public class Pyramid {
     public List<OctaveLayer> getDoG(int index) {
         if (index < 0 || index >= depth)
             throw new IllegalArgumentException();
-        Octave previous = getByIndex(index - 1);
-        Octave current = getByIndex(index);
-        List<OctaveLayer> gaussians = new ArrayList<>(octaveSize + 4);
-        gaussians.add(downSample(previous.getImages().get(octaveSize - 2)));
-        gaussians.add(downSample(previous.getImages().get(octaveSize - 1)));
-        for (int i = 0; i < octaveSize + 2; i++)
-            gaussians.add(current.getImages().get(i));
-
-        List<OctaveLayer> DoGs = new ArrayList<>(octaveSize + 2);
-        for (int i = 1; i < octaveSize + 4; i++) {
-            OctaveLayer cur = gaussians.get(i);
-            OctaveLayer prev = gaussians.get(i - 1);
-            Matrix delta = Matrix.subtract(cur.getImage(), prev.getImage());
-            DoGs.add(new OctaveLayer(i - 1, cur.getLocalSigma(), cur.getGlobalSigma(), delta));
-        }
-        return DoGs;
+        return DoGs.get(index);
     }
 
     public double getPixel(int x, int y, double sigma) {

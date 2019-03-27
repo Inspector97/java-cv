@@ -25,9 +25,9 @@ public class PointMarker {
         graphics.drawImage(image, 0, 0, null);
         graphics.setStroke(new BasicStroke(1));
         for (InterestingPoint interestingPoint : interestingPoints) {
-            int radius = (int) (interestingPoint.getOriginalScale() * SQRT_2);
-            int x = (int) (interestingPoint.getOriginalX() - radius);
-            int y = (int) (interestingPoint.getOriginalY() - radius);
+            int radius = (int) (interestingPoint.getScale() / 2);
+            int x = (int) (interestingPoint.getX() - radius);
+            int y = (int) (interestingPoint.getY() - radius);
             graphics.setColor(getSpectrum(interestingPoint.getProbability()));
             graphics.drawOval(x, y, 2 * radius, 2 * radius);
 
@@ -36,8 +36,8 @@ public class PointMarker {
             int dx = (int) (Math.cos(angle) * 10);
             int dy = (int) (Math.sin(angle) * 10);
 
-            graphics.drawLine((int) interestingPoint.getOriginalX(), (int) interestingPoint.getOriginalY(),
-                              (int) interestingPoint.getOriginalX() + dx, (int) interestingPoint.getOriginalY() + dy);
+            graphics.drawLine((int) interestingPoint.getX(), (int) interestingPoint.getY(),
+                              (int) interestingPoint.getX() + dx, (int) interestingPoint.getY() + dy);
 
         }
         graphics.dispose();
@@ -70,13 +70,13 @@ public class PointMarker {
         int radius = 2;
         graphics.setStroke(new BasicStroke(2));
         for (PointsPair pointsPair : matching.getPointsPairs()) {
-            int xA = (int) (pointsPair.getPointA().getOriginalX() - radius);
-            int yA = (int) (pointsPair.getPointA().getOriginalY() - radius);
+            int xA = (int) (pointsPair.getPointA().getX() - radius);
+            int yA = (int) (pointsPair.getPointA().getY() - radius);
             graphics.setColor(getSpectrum(pointsPair.getPointA().getProbability()));
             graphics.drawOval(xA, yA, 2 * radius, 2 * radius);
 
-            int xB = (int) (pointsPair.getPointB().getOriginalX() - radius + imageA.getWidth());
-            int yB = (int) (pointsPair.getPointB().getOriginalY() - radius);
+            int xB = (int) (pointsPair.getPointB().getX() - radius + imageA.getWidth());
+            int yB = (int) (pointsPair.getPointB().getY() - radius);
             graphics.drawOval(xB, yB, 2 * radius, 2 * radius);
 
             graphics.drawLine(xA + radius, yA + radius, xB + radius, yB + radius);

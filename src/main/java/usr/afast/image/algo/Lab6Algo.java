@@ -1,20 +1,14 @@
 package usr.afast.image.algo;
 
 import usr.afast.image.descriptor.ToDraw;
-import usr.afast.image.points.InterestingPoint;
 import usr.afast.image.util.Stopwatch;
 import usr.afast.image.wrapped.Matrix;
 
 import java.awt.image.BufferedImage;
-import java.util.List;
 
-import static usr.afast.image.descriptor.BlobFinder.findBlobs;
 import static usr.afast.image.descriptor.BlobFinder.matchBlobs;
 import static usr.afast.image.points.PointMarker.markMatching;
-import static usr.afast.image.points.PointMarker.markPoints;
 import static usr.afast.image.util.ImageIO.*;
-import static usr.afast.image.util.StringArgsUtil.getDouble;
-import static usr.afast.image.util.StringArgsUtil.getInt;
 
 @SuppressWarnings("Duplicates")
 public class Lab6Algo implements Algorithm {

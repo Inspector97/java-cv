@@ -15,26 +15,27 @@ import static usr.afast.image.util.Math.sqr;
 @EqualsAndHashCode
 public class InterestingPoint {
     @NonNull
-    private double originalX;
-    @NonNull
-    private double originalY;
-    @NonNull
-    private double probability;
-    @NonNull
-    private double scale;
-    @NonNull
-    private double originalScale;
+    private int x;
 
     @NonNull
-    private double scaledX;
+    private int y;
+
     @NonNull
-    private double scaledY;
+    private double probability;
+
+    @Setter
+    @Accessors(chain = true)
+    private double scale;
 
     @Setter
     @Accessors(chain = true)
     private double angle;
 
+    @Setter
+    @Accessors(chain = true)
+    private int octave, layer;
+
     public static double distance(@NotNull InterestingPoint a, @NotNull InterestingPoint b) {
-        return sqrt(sqr(a.originalX - b.originalX) + sqr(a.originalY - b.originalY));
+        return sqrt(sqr(a.x - b.y) + sqr(a.x - b.y));
     }
 }

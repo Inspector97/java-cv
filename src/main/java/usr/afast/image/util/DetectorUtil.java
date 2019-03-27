@@ -25,7 +25,7 @@ public class DetectorUtil {
                         ok = false;
                 }
                 if (ok) {
-                    candidates.add(InterestingPoint.at(i, j, values.getAt(i, j), 1, 1, i, j));
+                    candidates.add(InterestingPoint.at(i, j, values.getAt(i, j)).setAngle(0));
                 }
             }
         }
