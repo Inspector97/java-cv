@@ -2,13 +2,11 @@ package usr.afast.image.descriptor;
 
 import javafx.util.Pair;
 import lombok.AllArgsConstructor;
-import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.SingularValueDecomposition;
 import usr.afast.image.wrapped.Matrix;
 
-import java.awt.image.BufferedImage;
 import java.util.*;
 
 import static usr.afast.image.util.ImageIO.getSaveFilePath;
@@ -57,7 +55,7 @@ public class PanoramaMaker {
                 double x1 = conv[0], y1 = conv[1];
 
                 double eps = Math.max(convertCoordinate(x0, w2) - convertCoordinate(x1, w2),
-                        convertCoordinate(y0, h2) - convertCoordinate(y1, h2));
+                                      convertCoordinate(y0, h2) - convertCoordinate(y1, h2));
 //                System.out.println(eps);
                 if (eps < EPS) {
                     curOk.add(new Pair<>(pair.getKey(), pair.getValue()));
@@ -69,19 +67,17 @@ public class PanoramaMaker {
                 foundPerspective = perspective;
             }
             System.out.println("INLINE = " + inliners.size());
-
-            System.out.println();
         }
 
         int minX = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE;
         int minY = Integer.MAX_VALUE, maxY = Integer.MIN_VALUE;
 
-        for (int i = 0; i < imageB.getWidth(); i++) {
-            for (int j = 0; j < imageB.getHeight(); j++) {
+        for (int i = 0; i < imageA.getWidth(); i++) {
+            for (int j = 0; j < imageA.getHeight(); j++) {
                 double[] xy = new double[]{convertCoordinate(i, w1), convertCoordinate(j, h1)};
                 double[] nxt = foundPerspective.apply(xy);
-                int nx = convertCoordinate(nxt[0], w1);
-                int ny = convertCoordinate(nxt[1], w1);
+                int nx = convertCoordinate(nxt[0], w2);
+                int ny = convertCoordinate(nxt[1], h2);
                 minX = Math.min(minX, nx);
                 maxX = Math.max(maxX, nx);
                 minY = Math.min(minY, ny);
@@ -93,18 +89,18 @@ public class PanoramaMaker {
 
         Matrix matrix = new Matrix(nw, nh);
 
-        for (int i = 0; i < imageB.getWidth(); i++) {
-            for (int j = 0; j < imageB.getHeight(); j++) {
+        for (int i = 0; i < imageA.getWidth(); i++) {
+            for (int j = 0; j < imageA.getHeight(); j++) {
                 double[] xy = new double[]{convertCoordinate(i, w1), convertCoordinate(j, h1)};
                 double[] nxt = foundPerspective.apply(xy);
-                int nx = convertCoordinate(nxt[0], w1);
-                int ny = convertCoordinate(nxt[1], w1);
+                int nx = convertCoordinate(nxt[0], w2);
+                int ny = convertCoordinate(nxt[1], h2);
 
-                matrix.setAt(nx - minX, ny - minY, imageB.getAt(i, j));
+                matrix.setAt(nx - minX, ny - minY, imageA.getAt(i, j));
             }
         }
 
-        write(getSaveFilePath("E:\\GitHub\\java-cv\\images\\cats\\tempp\\azaza.png", "VOTING"), matrix);
+        write(getSaveFilePath("E:\\test_images\\cat\\tempp\\azaza.png", "VOTING"), matrix);
 
         return null;
     }
