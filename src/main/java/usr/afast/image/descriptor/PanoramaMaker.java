@@ -2,6 +2,7 @@ package usr.afast.image.descriptor;
 
 import javafx.util.Pair;
 import lombok.AllArgsConstructor;
+import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.SingularValueDecomposition;
@@ -75,8 +76,8 @@ public class PanoramaMaker {
         int minX = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE;
         int minY = Integer.MAX_VALUE, maxY = Integer.MIN_VALUE;
 
-        for (int i = 0; i < imageA.getWidth(); i++) {
-            for (int j = 0; j < imageA.getHeight(); j++) {
+        for (int i = 0; i < imageB.getWidth(); i++) {
+            for (int j = 0; j < imageB.getHeight(); j++) {
                 double[] xy = new double[]{convertCoordinate(i, w1), convertCoordinate(j, h1)};
                 double[] nxt = foundPerspective.apply(xy);
                 int nx = convertCoordinate(nxt[0], w1);
@@ -92,14 +93,14 @@ public class PanoramaMaker {
 
         Matrix matrix = new Matrix(nw, nh);
 
-        for (int i = 0; i < imageA.getWidth(); i++) {
-            for (int j = 0; j < imageA.getHeight(); j++) {
+        for (int i = 0; i < imageB.getWidth(); i++) {
+            for (int j = 0; j < imageB.getHeight(); j++) {
                 double[] xy = new double[]{convertCoordinate(i, w1), convertCoordinate(j, h1)};
                 double[] nxt = foundPerspective.apply(xy);
                 int nx = convertCoordinate(nxt[0], w1);
                 int ny = convertCoordinate(nxt[1], w1);
 
-                matrix.setAt(nx - minX, ny - minY, imageA.getAt(i, j));
+                matrix.setAt(nx - minX, ny - minY, imageB.getAt(i, j));
             }
         }
 
@@ -156,16 +157,16 @@ public class PanoramaMaker {
     @AllArgsConstructor
     static class Perspective {
         private RealMatrix matrix;
-        private double[][] h;
 
         Perspective(double[] buffer) {
-            h = new double[3][3];
+            double[][] h = new double[3][3];
             int ptr = 0;
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 3; j++) {
                     h[i][j] = buffer[ptr++];
                 }
             }
+//            matrix = new LUDecomposition(MatrixUtils.createRealMatrix(h)).getSolver().getInverse();
             matrix = MatrixUtils.createRealMatrix(h);
         }
 
