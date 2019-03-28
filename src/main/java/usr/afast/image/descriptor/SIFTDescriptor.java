@@ -105,9 +105,9 @@ public class SIFTDescriptor extends AbstractDescriptor {
 //            if (drawing) {
 //                ptr++;
 //                System.out.println("angle = " + Math.toDegrees(mainAngle));
-//                write(getSaveFilePath("E:\\test_images\\cat\\tempp\\temp.png", "rot_" + ptr), Matrix.save(temp1));
-//                write(getSaveFilePath("E:\\test_images\\cat\\tempp\\temp.png", "not_rot_" + ptr), Matrix.save(temp2));
-//                write(getSaveFilePath("E:\\test_images\\cat\\tempp\\temp.png", "gauss_" + ptr), Matrix.save(temp3));
+//                write(getSaveFilePath("E:\\GitHub\\java-cv\\images\\cats\\tempp\\temp.png", "rot_" + ptr), Matrix.save(temp1));
+//                write(getSaveFilePath("E:\\GitHub\\java-cv\\images\\cats\\tempp\\temp.png", "not_rot_" + ptr), Matrix.save(temp2));
+//                write(getSaveFilePath("E:\\GitHub\\java-cv\\images\\cats\\tempp\\temp.png", "gauss_" + ptr), Matrix.save(temp3));
 //            }
             int ptr = 0;
             for (int i = 0; i < gridSize; i++) {
