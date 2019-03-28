@@ -60,14 +60,14 @@ public class SIFTDescriptor extends AbstractDescriptor {
             double scale = point.getScale() / Math.pow(2, point.getOctave() + 1);
 
             int border = (int) Math.round(scale * 3) * 2 + 1;
-            System.out.println("bbbborder = " + border);
+//            System.out.println("bbbborder = " + border);
             int halfBorder = border / 2;
 
             GaussCalculator gauss = new GaussCalculator(3 * scale);
             int left = -halfBorder, right = border - halfBorder;
 
             double cellSize = border * 1.0 / gridSize;
-            System.out.println(border);
+//            System.out.println(border);
             boolean drawing = border >= 8;
             Matrix temp1 = new Matrix(border, border);
             Matrix temp2 = new Matrix(border, border);
@@ -185,7 +185,7 @@ public class SIFTDescriptor extends AbstractDescriptor {
         double scale = point.getScale() / Math.pow(2, point.getOctave() + 1);
 
         int border = (int) Math.round(scale * 3) * 2 + 1;
-        System.out.println("border = " + border);
+//        System.out.println("border = " + border);
         int halfBorder = border / 2;
 
         GaussCalculator gauss = new GaussCalculator(1.5 * scale);

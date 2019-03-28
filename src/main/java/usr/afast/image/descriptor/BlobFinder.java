@@ -34,7 +34,7 @@ public class BlobFinder {
     private static final double CONTRAST_THRESHOLD = 0.04;
     private static final double EDGE_THRESHOLD = 10;
 
-    public static ToDraw matchBlobs(Matrix aMatrix, Matrix bMatrix, String path) {
+    public static Matching matchBlobs(Matrix aMatrix, Matrix bMatrix, String path) {
         List<AbstractDescriptor> abstractDescriptorsA = findBlobs(aMatrix, path);
         List<AbstractDescriptor> abstractDescriptorsB = findBlobs(bMatrix, path);
 
@@ -43,7 +43,7 @@ public class BlobFinder {
 
     private static List<AbstractDescriptor> findBlobs(Matrix matrix, String path) {
         Pyramid pyramid = Pyramid.build(matrix, INIT_SIGMA, START_SIGMA, OCTAVE_SIZE);
-        save(pyramid, path);
+//        save(pyramid, path);
 
         List<AbstractDescriptor> descriptors = new LinkedList<>();
         double sqrt2 = Math.sqrt(2);

@@ -7,7 +7,7 @@ import java.util.List;
 
 @Getter
 @AllArgsConstructor
-public class ToDraw {
+public class Matching {
     private List<PointsPair> pointsPairs;
     private List<AbstractDescriptor> descriptorsA;
     private List<AbstractDescriptor> descriptorsB;

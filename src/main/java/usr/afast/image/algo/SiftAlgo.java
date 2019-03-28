@@ -26,7 +26,7 @@ public class SiftAlgo implements Algorithm {
 //                                  gridSize,
 //                                  cellSize,
 //                                  binCount);
-//        ToDraw matching = Stopwatch.measure(() -> HOGProcessor.process(imageA, imageB, descriptor));
+//        Matching matching = Stopwatch.measure(() -> HOGProcessor.process(imageA, imageB, descriptor));
 //
 //        BufferedImage result = markMatching(imageA, imageB, matching);
 //        write(getSaveFilePath(path, "SIFT_MATCHING"), result);

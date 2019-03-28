@@ -1,6 +1,7 @@
 package usr.afast.image.algo;
 
 import usr.afast.image.descriptor.Matching;
+import usr.afast.image.descriptor.PanoramaMaker;
 import usr.afast.image.util.Stopwatch;
 import usr.afast.image.wrapped.Matrix;
 
@@ -11,7 +12,7 @@ import static usr.afast.image.points.PointMarker.markMatching;
 import static usr.afast.image.util.ImageIO.*;
 
 @SuppressWarnings("Duplicates")
-public class Lab6Algo implements Algorithm {
+public class Lab8Algo implements Algorithm {
     @Override
     public void process(String path, String... args) {
         if (args.length < 1) {
@@ -23,11 +24,17 @@ public class Lab6Algo implements Algorithm {
 
         Matching matching = Stopwatch.measure(() -> matchBlobs(imageA, imageB, path));
 
-        BufferedImage withBlobs = markMatching(imageA, imageB, matching);
+        Matrix panorama = Stopwatch.measure(() -> PanoramaMaker.makePanorama(imageA, imageB, matching));
 
-        write(getSaveFilePath(path, "BLOBS"), withBlobs);
-
-        System.out.println("matched: " + matching.getPointsPairs().size());
+        if (panorama != null) {
+            write(getSaveFilePath(path, "PANORAMA"), panorama);
+        }
+//
+//        BufferedImage withBlobs = markMatching(imageA, imageB, matching);
+//
+//        write(getSaveFilePath(path, "BLOBS"), withBlobs);
+//
+//        System.out.println("matched: " + matching.getPointsPairs().size());
 
 //        pyramid.save(path);
     }

@@ -1,12 +1,10 @@
 package usr.afast.image.algo;
 
 import usr.afast.image.descriptor.*;
-import usr.afast.image.points.InterestingPoint;
 import usr.afast.image.util.Stopwatch;
 import usr.afast.image.wrapped.Matrix;
 
 import java.awt.image.BufferedImage;
-import java.util.List;
 
 import static usr.afast.image.points.PointMarker.markMatching;
 import static usr.afast.image.util.ImageIO.*;
@@ -27,7 +25,7 @@ public class HogAlgo implements Algorithm {
                                  gridSize,
                                  cellSize,
                                  binCount);
-        ToDraw matching = Stopwatch.measure(() -> HOGProcessor.process(imageA, imageB, descriptor));
+        Matching matching = Stopwatch.measure(() -> HOGProcessor.process(imageA, imageB, descriptor));
 
         BufferedImage result = markMatching(imageA, imageB, matching);
         write(getSaveFilePath(path, "HOG_MATCHING"), result);

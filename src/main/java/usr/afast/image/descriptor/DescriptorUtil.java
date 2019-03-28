@@ -5,12 +5,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class DescriptorUtil {
     private static final double NEXT_NEAREST_DISTANCE_RATIO = 0.8;
-    public static ToDraw match(List<? extends AbstractDescriptor> descriptorsA,
-                                          List<? extends AbstractDescriptor> descriptorsB) {
+    public static Matching match(List<? extends AbstractDescriptor> descriptorsA,
+                                 List<? extends AbstractDescriptor> descriptorsB) {
         List<PointsPair> pointsMatching = new LinkedList<>();
 
         for (AbstractDescriptor descriptorA : descriptorsA) {
@@ -21,7 +20,7 @@ public class DescriptorUtil {
             pointsMatching.add(PointsPair.from(descriptorA.getPoint(), closest.getPoint()));
         }
 
-        return new ToDraw(pointsMatching, new ArrayList<>(descriptorsA), new ArrayList<>(descriptorsB));
+        return new Matching(pointsMatching, new ArrayList<>(descriptorsA), new ArrayList<>(descriptorsB));
     }
 
     private static AbstractDescriptor getClosest(AbstractDescriptor descriptor,

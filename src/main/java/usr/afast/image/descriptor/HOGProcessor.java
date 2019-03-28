@@ -7,7 +7,6 @@ import usr.afast.image.wrapped.Matrix;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static usr.afast.image.algo.AlgoLib.getSobelX;
 import static usr.afast.image.algo.AlgoLib.getSobelY;
@@ -18,9 +17,9 @@ import static usr.afast.image.points.PointsFilter.filterPoints;
 public class HOGProcessor {
     private static final int POINTS = 50;
 
-    public static ToDraw process(Matrix imageA,
-                                 Matrix imageB,
-                                 GistogramBasedDescriptor descriptor) {
+    public static Matching process(Matrix imageA,
+                                   Matrix imageB,
+                                   GistogramBasedDescriptor descriptor) {
         Matrix xA = getSobelX(imageA, BorderHandling.Mirror);
         Matrix yA = getSobelY(imageA, BorderHandling.Mirror);
         Matrix xB = getSobelX(imageB, BorderHandling.Mirror);

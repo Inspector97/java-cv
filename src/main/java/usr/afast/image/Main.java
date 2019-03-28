@@ -64,6 +64,9 @@ public class Main {
             case Lab6:
                 new Lab6Algo().process(path, restArgs);
                 break;
+            case Lab8:
+                new Lab8Algo().process(path, restArgs);
+                break;
             default:
                 System.out.println("Not implemented yet");
         }

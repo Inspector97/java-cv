@@ -17,8 +17,8 @@ import static usr.afast.image.points.PointsFilter.filterPoints;
 public class PatchProcessor {
     private static final int POINTS = 30;
 
-    public static ToDraw processWithPatches(Matrix imageA, Matrix imageB, final int gridHalfSize,
-                                                      final int cellHalfSize) {
+    public static Matching processWithPatches(Matrix imageA, Matrix imageB, final int gridHalfSize,
+                                              final int cellHalfSize) {
         Matrix gradientA = getGradient(imageA);
         Matrix gradientB = getGradient(imageB);
 

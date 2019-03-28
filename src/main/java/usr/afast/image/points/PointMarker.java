@@ -3,7 +3,7 @@ package usr.afast.image.points;
 import org.jetbrains.annotations.NotNull;
 import usr.afast.image.descriptor.AbstractDescriptor;
 import usr.afast.image.descriptor.PointsPair;
-import usr.afast.image.descriptor.ToDraw;
+import usr.afast.image.descriptor.Matching;
 import usr.afast.image.wrapped.Matrix;
 
 import java.awt.*;
@@ -45,7 +45,7 @@ public class PointMarker {
         return result;
     }
 
-    public static BufferedImage markMatching(Matrix imageA, Matrix imageB, @NotNull ToDraw matching) {
+    public static BufferedImage markMatching(Matrix imageA, Matrix imageB, @NotNull Matching matching) {
         List<InterestingPoint> pointA = matching.getDescriptorsA()
                                                 .stream()
                                                 .map(AbstractDescriptor::getPoint)

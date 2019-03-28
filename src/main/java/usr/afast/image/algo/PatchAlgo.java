@@ -1,13 +1,11 @@
 package usr.afast.image.algo;
 
+import usr.afast.image.descriptor.Matching;
 import usr.afast.image.descriptor.PatchProcessor;
-import usr.afast.image.descriptor.PointsPair;
-import usr.afast.image.descriptor.ToDraw;
 import usr.afast.image.util.Stopwatch;
 import usr.afast.image.wrapped.Matrix;
 
 import java.awt.image.BufferedImage;
-import java.util.List;
 
 import static usr.afast.image.points.PointMarker.markMatching;
 import static usr.afast.image.util.ImageIO.*;
@@ -20,7 +18,7 @@ public class PatchAlgo implements Algorithm {
         Matrix imageB = Matrix.of(read(args[0]));
         int gridHalfSize = getInt(1, args);
         int cellHalfSize = getInt(2, args);
-        ToDraw matching = Stopwatch.measure(() -> PatchProcessor.processWithPatches(imageA,
+        Matching matching = Stopwatch.measure(() -> PatchProcessor.processWithPatches(imageA,
                                                                                               imageB,
                                                                                               gridHalfSize,
                                                                                               cellHalfSize));
