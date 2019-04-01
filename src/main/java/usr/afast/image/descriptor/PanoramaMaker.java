@@ -7,6 +7,7 @@ import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.SingularValueDecomposition;
 import usr.afast.image.wrapped.Matrix;
 
+import java.awt.image.BufferedImage;
 import java.util.*;
 
 import static usr.afast.image.util.ImageIO.getSaveFilePath;
@@ -18,19 +19,22 @@ public class PanoramaMaker {
 
     private static final double EPS = 10;
 
-    public static Matrix makePanorama(Matrix imageA, Matrix imageB, Matching matching) {
+    public static BufferedImage makePanorama(BufferedImage imageA, BufferedImage imageB, Matching matching) {
+        Matrix matrixA = Matrix.of(imageA);
+        Matrix matrixB = Matrix.of(imageB);
         List<PointsPair> matches = matching.getPointsPairs();
-        int n = matches.size();
+        final int n = matches.size();
         indices = new ArrayList<>(n);
         for (int i = 0; i < n; i++) indices.add(i);
         int cnt = 1000;
 
         List<Pair<double[], double[]>> inliners = new LinkedList<>();
         Perspective foundPerspective = null;
+        Perspective foundReversePerspective = null;
 
         List<Pair<double[], double[]>> pairs = new ArrayList<>(n);
-        int w1 = imageA.getWidth(), h1 = imageA.getHeight();
-        int w2 = imageB.getWidth(), h2 = imageB.getHeight();
+        int w1 = matrixA.getWidth(), h1 = matrixA.getHeight();
+        int w2 = matrixB.getWidth(), h2 = matrixB.getHeight();
         for (int i = 0; i < n; i++) {
             PointsPair cur = matches.get(i);
             pairs.add(new Pair<>(
@@ -46,8 +50,10 @@ public class PanoramaMaker {
             for (int i = 0; i < 4; i++) currentMatch.add(pairs.get(indices.get(i)));
 
             Perspective perspective = getPerspective(currentMatch);
+            Perspective reversed = getReversePerspective(currentMatch);
             List<Pair<double[], double[]>> curOk = new LinkedList<>();
             int inline = 0;
+            int inline2 = 0;
             for (int i = 0; i < n; i++) {
                 Pair<double[], double[]> pair = pairs.get(i);
                 double[] conv = perspective.apply(pair.getKey());
@@ -55,7 +61,7 @@ public class PanoramaMaker {
                 double x1 = conv[0], y1 = conv[1];
 
                 double eps = Math.max(convertCoordinate(x0, w2) - convertCoordinate(x1, w2),
-                                      convertCoordinate(y0, h2) - convertCoordinate(y1, h2));
+                        convertCoordinate(y0, h2) - convertCoordinate(y1, h2));
 //                System.out.println(eps);
                 if (eps < EPS) {
                     curOk.add(new Pair<>(pair.getKey(), pair.getValue()));
@@ -65,44 +71,71 @@ public class PanoramaMaker {
             if (inliners.size() < curOk.size()) {
                 inliners = curOk;
                 foundPerspective = perspective;
+                foundReversePerspective = reversed;
             }
             System.out.println("INLINE = " + inliners.size());
         }
 
-        int minX = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE;
-        int minY = Integer.MAX_VALUE, maxY = Integer.MIN_VALUE;
+        double minX = -1, maxX = 1;
+        double minY = -1, maxY = 1;
+        int[][] angles = new int[][]{
+                {0, 0},
+                {0, imageB.getHeight()},
+                {imageB.getWidth(), 0},
+                {imageB.getWidth(), imageB.getHeight()}
+        };
 
-        for (int i = 0; i < imageA.getWidth(); i++) {
-            for (int j = 0; j < imageA.getHeight(); j++) {
-                double[] xy = new double[]{convertCoordinate(i, w1), convertCoordinate(j, h1)};
+        for (int[] angle : angles) {
+            double[] point = foundReversePerspective.apply(new double[]{convertCoordinate(angle[0], imageB.getWidth()),
+                    convertCoordinate(angle[1], imageB.getHeight())});
+            minX = Math.min(minX, point[0]);
+            minY = Math.min(minY, point[1]);
+            maxX = Math.max(maxX, point[0]);
+            maxY = Math.max(maxY, point[1]);
+        }
+        int minI = convertCoordinate(minX, w1);
+        int maxI = convertCoordinate(maxX, w1);
+        int minJ = convertCoordinate(minY, h1);
+        int maxJ = convertCoordinate(maxY, h1);
+
+        int nw = maxI - minI + 1, nh = maxJ - minJ + 1;
+
+        BufferedImage result = new BufferedImage(nw, nh, BufferedImage.TYPE_INT_RGB);
+
+//        for (int i = 0; i < imageA.getWidth(); i++) {
+//            for (int j = 0; j < imageA.getHeight(); j++) {
+//                int x = i - minX, y = j - minY;
+//                result.setRGB(x, y, imageA.getRGB(i, j));
+//            }
+//        }
+
+
+        System.out.println(minX + " " + minY);
+
+        for (int i = minI; i <= maxI; i++) {
+            for (int j = minJ; j <= maxJ; j++) {
+                double x = (1D * i - minI) / (maxI - minI) * (maxX - minX) + minX;
+                double y = (1D * j - minJ) / (maxJ - minJ) * (maxY - minY) + minY;
+                double[] xy = new double[]{x, y};
+
+                int aX = convertCoordinate(xy[0], w1);
+                int aY = convertCoordinate(xy[1], h1);
+                if (aX >= 0 && aX < w1 && aY >= 0 && aY < h1) {
+                    result.setRGB(i - minI, j - minJ, imageA.getRGB(aX, aY));
+                }
+
                 double[] nxt = foundPerspective.apply(xy);
-                int nx = convertCoordinate(nxt[0], w2);
-                int ny = convertCoordinate(nxt[1], h2);
-                minX = Math.min(minX, nx);
-                maxX = Math.max(maxX, nx);
-                minY = Math.min(minY, ny);
-                maxY = Math.max(maxY, ny);
+                int nx = convertCoordinate(nxt[0], imageB.getWidth());
+                int ny = convertCoordinate(nxt[1], imageB.getHeight());
+                if (nx >= 0 && nx < imageB.getWidth() && ny >= 0 && ny < imageB.getHeight()) {
+                    result.setRGB(i - minI, j - minJ, imageB.getRGB(nx, ny));
+                }
             }
         }
 
-        int nw = maxX - minX + 1, nh = maxY - minY + 1;
+//        write(getSaveFilePath("E:\\GitHub\\java-cv\\images\\cats\\tempp\\azaza.png", "VOTING"), result);
 
-        Matrix matrix = new Matrix(nw, nh);
-
-        for (int i = 0; i < imageA.getWidth(); i++) {
-            for (int j = 0; j < imageA.getHeight(); j++) {
-                double[] xy = new double[]{convertCoordinate(i, w1), convertCoordinate(j, h1)};
-                double[] nxt = foundPerspective.apply(xy);
-                int nx = convertCoordinate(nxt[0], w2);
-                int ny = convertCoordinate(nxt[1], h2);
-
-                matrix.setAt(nx - minX, ny - minY, imageA.getAt(i, j));
-            }
-        }
-
-        write(getSaveFilePath("E:\\test_images\\cat\\tempp\\azaza.png", "VOTING"), matrix);
-
-        return null;
+        return result;
     }
 
     private static double convertCoordinate(int coord, int size) {
@@ -148,6 +181,14 @@ public class PanoramaMaker {
 //        System.out.println(Arrays.toString(h));
 
         return new Perspective(h);
+    }
+
+    private static Perspective getReversePerspective(List<Pair<double[], double[]>> currentMatch) {
+        List<Pair<double[], double[]>> reversed = new ArrayList<>(currentMatch.size());
+        for (Pair<double[], double[]> cur : currentMatch) {
+            reversed.add(new Pair<>(cur.getValue(), cur.getKey()));
+        }
+        return getPerspective(reversed);
     }
 
     @AllArgsConstructor

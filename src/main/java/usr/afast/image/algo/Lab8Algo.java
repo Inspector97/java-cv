@@ -24,7 +24,11 @@ public class Lab8Algo implements Algorithm {
 
         Matching matching = Stopwatch.measure(() -> matchBlobs(imageA, imageB, path));
 
-        Matrix panorama = Stopwatch.measure(() -> PanoramaMaker.makePanorama(imageA, imageB, matching));
+        System.out.println("matched: " + matching.getPointsPairs().size());
+        BufferedImage withBlobs = markMatching(imageA, imageB, matching);
+        write(getSaveFilePath(path, "BLOBS"), withBlobs);
+
+        BufferedImage panorama = Stopwatch.measure(() -> PanoramaMaker.makePanorama(read(path), read(args[0]), matching));
 
         if (panorama != null) {
             write(getSaveFilePath(path, "PANORAMA"), panorama);
