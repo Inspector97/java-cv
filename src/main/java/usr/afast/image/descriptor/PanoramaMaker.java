@@ -46,8 +46,6 @@ public class PanoramaMaker {
 
             Perspective perspective = getPerspective(currentMatch);
             List<Pair<Point, Point>> curOk = new LinkedList<>();
-            int inline = 0;
-            int inline2 = 0;
             for (int i = 0; i < n; i++) {
                 Pair<Point, Point> pair = pairs.get(i);
                 Point a = pair.getKey(), b = pair.getValue();
@@ -57,17 +55,13 @@ public class PanoramaMaker {
 
                 double eps = Math.max(Math.abs(convertFrom(x0, w2) - convertFrom(x1, w2)),
                         Math.abs(convertFrom(y0, h2) - convertFrom(y1, h2)));
-//                System.out.println(eps);
                 if (eps < EPS) {
                     curOk.add(new Pair<>(pair.getKey(), pair.getValue()));
-                    inline++;
                 }
             }
             if (inliners.size() < curOk.size()) {
                 inliners = new ArrayList<>(curOk);
                 System.out.println("INLINE = " + inliners.size());
-                foundPerspective = getPerspective(currentMatch);
-                foundReversePerspective = getReversePerspective(currentMatch);
             }
         }
 
@@ -135,8 +129,6 @@ public class PanoramaMaker {
                 }
             }
         }
-
-//        write(getSaveFilePath("E:\\GitHub\\java-cv\\images\\cats\\tempp\\azaza.png", "VOTING"), result);
 
         return result;
     }
@@ -225,7 +217,8 @@ public class PanoramaMaker {
             RealMatrix realMatrix = MatrixUtils.createRealMatrix(coords);
             realMatrix = matrix.multiply(realMatrix);
             double[][] buf = realMatrix.getData();
-            return Point.at(buf[0][0], buf[1][0]);
+            double scale = buf[2][0];
+            return Point.at(buf[0][0] / scale, buf[1][0] / scale);
         }
     }
 
