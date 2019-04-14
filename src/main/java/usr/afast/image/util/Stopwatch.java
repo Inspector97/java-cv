@@ -14,4 +14,11 @@ public class Stopwatch {
         System.out.println(String.format("Processed in %.3f s.", time));
         return result;
     }
+    public static void measure(@NotNull Runnable runnable) {
+        System.out.println("Start processing");
+        long startTime = System.currentTimeMillis();
+        runnable.run();
+        double time = (System.currentTimeMillis() - startTime) / 1000D;
+        System.out.println(String.format("Processed in %.3f s.", time));
+    }
 }
