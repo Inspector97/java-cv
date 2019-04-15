@@ -4,6 +4,8 @@ import lombok.*;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.Serializable;
+
 import static java.lang.Math.sqrt;
 import static usr.afast.image.util.Math.sqr;
 
@@ -13,7 +15,7 @@ import static usr.afast.image.util.Math.sqr;
 @Builder(toBuilder = true)
 @ToString
 @EqualsAndHashCode
-public class InterestingPoint {
+public class InterestingPoint implements Serializable {
     @NonNull
     private int x;
 

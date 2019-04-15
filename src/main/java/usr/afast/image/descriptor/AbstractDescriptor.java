@@ -3,11 +3,12 @@ package usr.afast.image.descriptor;
 import org.jetbrains.annotations.NotNull;
 import usr.afast.image.points.InterestingPoint;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 import static usr.afast.image.util.Math.sqr;
 
-public abstract class AbstractDescriptor {
+public abstract class AbstractDescriptor implements Serializable {
     public void normalize() {
         double[] descriptor = getDescriptor();
         double sum = Arrays.stream(descriptor).sum();

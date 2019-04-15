@@ -22,48 +22,12 @@ public class PanoramaMaker {
         Matrix matrixB = Matrix.of(imageB);
         List<PointsPair> matches = matching.getPointsPairs();
         final int n = matches.size();
-        indices = new ArrayList<>(n);
-        for (int i = 0; i < n; i++) indices.add(i);
-        int cnt = 1000;
-
-        List<Pair<Point, Point>> inliners = new LinkedList<>();
         Perspective foundPerspective = null;
         Perspective foundReversePerspective = null;
-
-        List<Pair<Point, Point>> pairs = new ArrayList<>(n);
         int w1 = matrixA.getWidth(), h1 = matrixA.getHeight();
         int w2 = matrixB.getWidth(), h2 = matrixB.getHeight();
-        for (int i = 0; i < n; i++) {
-            PointsPair cur = matches.get(i);
-            pairs.add(new Pair<>(Point.at(convertTo(cur.getPointA().getX(), w1), convertTo(cur.getPointA().getY(), h1)),
-                    Point.at(convertTo(cur.getPointB().getX(), w2), convertTo(cur.getPointB().getY(), h2))));
-        }
 
-        for (int voting = 0; voting < cnt; voting++) {
-            Collections.shuffle(indices, RANDOM);
-            List<Pair<Point, Point>> currentMatch = new ArrayList<>(4);
-            for (int i = 0; i < 4; i++) currentMatch.add(pairs.get(indices.get(i)));
-
-            Perspective perspective = getPerspective(currentMatch);
-            List<Pair<Point, Point>> curOk = new LinkedList<>();
-            for (int i = 0; i < n; i++) {
-                Pair<Point, Point> pair = pairs.get(i);
-                Point a = pair.getKey(), b = pair.getValue();
-                Point conv = perspective.apply(pair.getKey());
-                double x0 = b.getX(), y0 = b.getY();
-                double x1 = conv.getX(), y1 = conv.getY();
-
-                double eps = Math.max(Math.abs(convertFrom(x0, w2) - convertFrom(x1, w2)),
-                        Math.abs(convertFrom(y0, h2) - convertFrom(y1, h2)));
-                if (eps < EPS) {
-                    curOk.add(new Pair<>(pair.getKey(), pair.getValue()));
-                }
-            }
-            if (inliners.size() < curOk.size()) {
-                inliners = new ArrayList<>(curOk);
-                System.out.println("INLINE = " + inliners.size());
-            }
-        }
+        List<Pair<Point, Point>> inliners = getInliners(matrixA, matrixB, matches);
 
         foundPerspective = getPerspective(inliners);
         foundReversePerspective = getReversePerspective(inliners);
@@ -133,17 +97,63 @@ public class PanoramaMaker {
         return result;
     }
 
-    private static double convertTo(int coord, int size) {
+    public static List<Pair<Point, Point>> getInliners(Matrix matrixA, Matrix matrixB, List<PointsPair> matches) {
+        int cnt = 1000;
+        final int n = matches.size();
+        indices = new ArrayList<>(n);
+        for (int i = 0; i < n; i++) indices.add(i);
+
+        List<Pair<Point, Point>> inliners = new LinkedList<>();
+
+        List<Pair<Point, Point>> pairs = new ArrayList<>(n);
+        int w1 = matrixA.getWidth(), h1 = matrixA.getHeight();
+        int w2 = matrixB.getWidth(), h2 = matrixB.getHeight();
+        for (int i = 0; i < n; i++) {
+            PointsPair cur = matches.get(i);
+            pairs.add(new Pair<>(Point.at(convertTo(cur.getPointA().getX(), w1), convertTo(cur.getPointA().getY(), h1)),
+                    Point.at(convertTo(cur.getPointB().getX(), w2), convertTo(cur.getPointB().getY(), h2))));
+        }
+
+        for (int voting = 0; voting < cnt; voting++) {
+            Collections.shuffle(indices, RANDOM);
+            List<Pair<Point, Point>> currentMatch = new ArrayList<>(4);
+            for (int i = 0; i < 4; i++) currentMatch.add(pairs.get(indices.get(i)));
+
+            Perspective perspective = getPerspective(currentMatch);
+            List<Pair<Point, Point>> curOk = new LinkedList<>();
+            for (int i = 0; i < n; i++) {
+                Pair<Point, Point> pair = pairs.get(i);
+                Point a = pair.getKey(), b = pair.getValue();
+                Point conv = perspective.apply(pair.getKey());
+                double x0 = b.getX(), y0 = b.getY();
+                double x1 = conv.getX(), y1 = conv.getY();
+
+                double eps = Math.max(Math.abs(convertFrom(x0, w2) - convertFrom(x1, w2)),
+                        Math.abs(convertFrom(y0, h2) - convertFrom(y1, h2)));
+                if (eps < EPS) {
+                    curOk.add(new Pair<>(pair.getKey(), pair.getValue()));
+                }
+            }
+            if (inliners.size() < curOk.size()) {
+                inliners = new ArrayList<>(curOk);
+            }
+        }
+        if (inliners.size() <= n / 2)
+            return null;
+        return inliners;
+    }
+
+    public static double convertTo(int coord, int size) {
 //        return coord;
         return (2D * coord - size) / size;
     }
 
-    private static int convertFrom(double coord, int size) {
+    public static int convertFrom(double coord, int size) {
 //        return (int) coord;
         return (int) ((coord * size + size) / 2);
     }
 
-    private static Perspective getPerspective(List<Pair<Point, Point>> currentMatch) {
+    public static Perspective getPerspective(List<Pair<Point, Point>> currentMatch) {
         double[][] matrix = new double[currentMatch.size() * 2][9];
         for (int i = 0; i < currentMatch.size(); i++) {
             Point a = currentMatch.get(i).getKey();
@@ -179,7 +189,7 @@ public class PanoramaMaker {
         return new Perspective(h);
     }
 
-    private static Perspective getReversePerspective(List<Pair<Point, Point>> currentMatch) {
+    public static Perspective getReversePerspective(List<Pair<Point, Point>> currentMatch) {
         List<Pair<Point, Point>> reversed = new ArrayList<>(currentMatch.size());
         for (Pair<Point, Point> cur : currentMatch) {
             reversed.add(new Pair<>(cur.getValue(), cur.getKey()));
@@ -189,13 +199,13 @@ public class PanoramaMaker {
 
     @Getter
     @AllArgsConstructor(staticName = "at")
-    private static class Point {
+    public static class Point {
         private double x;
         private double y;
     }
 
     @AllArgsConstructor
-    static class Perspective {
+    public static class Perspective {
         private RealMatrix matrix;
 
         Perspective(double[] buffer) {
@@ -209,7 +219,7 @@ public class PanoramaMaker {
             matrix = MatrixUtils.createRealMatrix(h);
         }
 
-        Point apply(Point point) {
+        public Point apply(Point point) {
             double[][] coords = new double[3][1];
             coords[0][0] = point.getX();
             coords[1][0] = point.getY();

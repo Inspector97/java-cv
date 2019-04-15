@@ -1,23 +1,37 @@
 package usr.afast.image.detector;
 
-import org.apache.commons.math3.util.Pair;
+import javafx.util.Pair;
 import org.jetbrains.annotations.Contract;
 import usr.afast.image.descriptor.Matching;
+import usr.afast.image.descriptor.PanoramaMaker;
+import usr.afast.image.descriptor.PanoramaMaker.Point;
 import usr.afast.image.descriptor.PointsPair;
 import usr.afast.image.points.InterestingPoint;
 import usr.afast.image.wrapped.Matrix;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.*;
+import java.util.LinkedList;
+import java.util.List;
 
 import static usr.afast.image.descriptor.BlobFinder.matchBlobs;
+import static usr.afast.image.descriptor.PanoramaMaker.*;
 import static usr.afast.image.points.PointMarker.markMatching;
 import static usr.afast.image.util.ImageIO.*;
 
 public class ObjectDetector {
-    public static void detect(String savePath, Matrix image, Matrix... objects) {
+    public static void detect(String savePath, Matrix image, int hash, Matrix... objects) {
         Matrix object = objects[0];
-        Matching matching = matchBlobs(image, object, savePath);
+        String fileName = hash + ".bin";
+        File file = new File(fileName);
+        Matching matching;
+        if (!file.exists()) {
+            matching = matchBlobs(image, object, savePath);
+            save(file, matching);
+        } else {
+            matching = read(file);
+        }
 
         BufferedImage withBlobs = markMatching(image, object, matching);
         write(getSaveFilePath(savePath, "MATCHING"), withBlobs);
@@ -26,7 +40,7 @@ public class ObjectDetector {
         double objectCenterX = object.getWidth() / 2D;
         double objectCenterY = object.getHeight() / 2D;
 
-        Voting voting = new Voting(image.getWidth(), 30, image.getHeight(), 30, image.getWidth(), 30, Math.PI / 30);
+        Voting voting = new Voting(image.getWidth(), 30, image.getHeight(), 30, image.getWidth(), 30, Math.PI / 6);
 
         for (PointsPair pair : matching.getPointsPairs()) {
             InterestingPoint atImage = pair.getPointA();
@@ -51,15 +65,87 @@ public class ObjectDetector {
             double votingAngle = atImage.getAngle() - atObject.getAngle();
             double votingScale = objectScale * atImage.getScale();
 
-            voting.vote(resultX, resultY, votingScale, votingAngle);
+            voting.vote(resultX, resultY, votingScale, votingAngle, pair);
         }
 
-        voting.maximums(image, savePath, object.getWidth(), object.getHeight());
+        List<List<PointsPair>> candidates = voting.maximums(image, savePath, object.getWidth(), object.getHeight());
+        int w1 = image.getWidth(), h1 = image.getHeight();
+        int w2 = object.getWidth(), h2 = object.getHeight();
+        BufferedImage bufferedImage = Matrix.save(image);
+        Graphics2D graphics = bufferedImage.createGraphics();
+        graphics.setColor(Color.ORANGE);
+        graphics.setStroke(new BasicStroke(2));
+        int rects = 0;
+        for (List<PointsPair> match : candidates) {
+            List<Pair<Point, Point>> inliners = PanoramaMaker.getInliners(image, object, match);
+            if (inliners == null) continue;
+            if (inliners.size() < 10) continue;
+            System.out.println(inliners.size());
+            PanoramaMaker.Perspective reversePerspective = getReversePerspective(inliners);
+            Point leftTop = Point.at(-1, -1);
+            leftTop = reversePerspective.apply(leftTop);
+            Point convertedLeftTop = Point.at(convertFrom(leftTop.getX(), w1),
+                    convertFrom(leftTop.getY(), h1));
+            Point rightTop = Point.at(1, -1);
+            rightTop = reversePerspective.apply(rightTop);
+            Point convertedRightTop = Point.at(convertFrom(rightTop.getX(), w1),
+                    convertFrom(rightTop.getY(), h1));
+            Point leftBottom = Point.at(-1, 1);
+            leftBottom = reversePerspective.apply(leftBottom);
+            Point convertedLeftBottom = Point.at(convertFrom(leftBottom.getX(), w1),
+                    convertFrom(leftBottom.getY(), h1));
+            Point rightBottom = Point.at(1, 1);
+            rightBottom = reversePerspective.apply(rightBottom);
+            Point convertedRightBottom = Point.at(convertFrom(rightBottom.getX(), w1),
+                    convertFrom(rightBottom.getY(), h1));
+            rects++;
+            drawRect(graphics, convertedLeftBottom, convertedLeftTop, convertedRightTop, convertedRightBottom);
+
+        }
+        System.out.println("Drawed " + rects + " rects");
+        graphics.dispose();
+        write(getSaveFilePath(savePath, "MAXS"), bufferedImage);
+    }
+
+    private static void drawRect(Graphics2D graphics, Point... points) {
+        for (int i = 0; i < points.length; i++) {
+            int j = (i + 1) % points.length;
+            graphics.drawLine((int) points[i].getX(),
+                    (int) points[i].getY(),
+                    (int) points[j].getX(),
+                    (int) points[j].getY());
+        }
+    }
+
+    private static void save(File file, Matching matching) {
+        try {
+            FileOutputStream fout = new FileOutputStream(file);
+            ObjectOutputStream oos = new ObjectOutputStream(fout);
+            oos.writeObject(matching);
+            oos.close();
+            fout.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static Matching read(File file) {
+        Matching matching = null;
+        try {
+            FileInputStream fileInputStream = new FileInputStream(file);
+            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+            matching = (Matching) objectInputStream.readObject();
+            objectInputStream.close();
+            fileInputStream.close();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return matching;
     }
 
     static class Voting {
         private double[][][][] votes;
-        private int[][][][] votedPairs;
+        private List<PointsPair>[][][][] votedPairs;
         private int widthBin, heightBin;
         private double angleBin, scaleBin;
         private int n, m, k, l;
@@ -68,17 +154,17 @@ public class ObjectDetector {
             n = width / widthBin + 1;
             m = height / heightBin + 1;
             k = (int) (maxScale / scaleBin + 1);
-            l = (int) (2 * Math.PI / angleBin + 1);
+            l = (int) Math.round(2 * Math.PI / angleBin);
             System.out.println(n + " " + m + " " + k + " " + l);
             votes = new double[n][m][k][l];
-            votedPairs = new int[n][m][k][l];
+            votedPairs = new List[n][m][k][l];
             this.angleBin = angleBin;
             this.heightBin = heightBin;
             this.widthBin = widthBin;
             this.scaleBin = scaleBin;
         }
 
-        public void vote(double x, double y, double scale, double angle) {
+        public void vote(double x, double y, double scale, double angle, PointsPair pointsPair) {
             angle = normalize(angle);
             double _x = x * 1D / widthBin;
             double _y = y * 1D / heightBin;
@@ -88,30 +174,28 @@ public class ObjectDetector {
             if (_x < 0 || _y < 0 || _scale < 0 || _angle < 0) return;
             if (_x >= n || _y >= m || _scale >= k || _angle >= l) return;
             for (int i = 0; i <= 1; i++) {
-                int curX = i == 0 ? (int) _x : (int) _x + 1;
-                if (curX >= this.n) continue;
+                int curX = ((int) _x + i) % n;
                 for (int j = 0; j <= 1; j++) {
-                    int curY = j == 0 ? (int) _y : (int) _y + 1;
-                    if (curY >= this.m) continue;
+                    int curY = ((int) _y + j) % m;
                     for (int k = 0; k <= 1; k++) {
-                        int curScale = k == 0 ? (int) _scale : (int) _scale + 1;
-                        if (curScale >= this.k) continue;
+                        int curScale = ((int) _scale + k) % this.k;
                         for (int l = 0; l <= 1; l++) {
-                            int curAngle = l == 0 ? (int) _angle : (int) _angle + 1;
-                            if (curAngle >= this.l) continue;
+                            int curAngle = ((int) _angle + l) % this.l;
                             votes[curX][curY][curScale][curAngle] +=
                                     Math.abs(_x - curX) *
-                                    Math.abs(_y - curY) *
-                                    Math.abs(_scale - curScale) *
-                                    Math.abs(_angle - curAngle);
-//                            votedPairs[(int) _x][(int) _y][(int) _scale][(int) _angle]++;
-                            votedPairs[curX][curY][curScale][curAngle]++;
+                                            Math.abs(_y - curY) *
+                                            Math.abs(_scale - curScale) *
+                                            Math.abs(_angle - curAngle);
+                            List<PointsPair> list = votedPairs[curX][curY][curScale][curAngle];
+                            if (list == null) {
+                                votedPairs[curX][curY][curScale][curAngle] = list = new LinkedList<>();
+                            }
+                            list.add(pointsPair);
                         }
                     }
                 }
             }
         }
-
 
         @Contract(pure = true)
         private double normalize(double angle) {
@@ -123,17 +207,18 @@ public class ObjectDetector {
         }
 
 
-        public void maximums(Matrix matrix, String path, int objWidth, int objHeight) {
+        public List<List<PointsPair>> maximums(Matrix matrix, String path, int objWidth, int objHeight) {
+            List<List<PointsPair>> lists = new LinkedList<>();
             BufferedImage bufferedImage = Matrix.save(matrix);
-            Graphics2D graphics = bufferedImage.createGraphics();
-            graphics.setStroke(new BasicStroke(2));
-            graphics.setColor(Color.ORANGE);
+//            Graphics2D graphics = bufferedImage.createGraphics();
+//            graphics.setStroke(new BasicStroke(2));
+//            graphics.setColor(Color.ORANGE);
             for (int i = 0; i < n; i++) {
                 for (int j = 0; j < m; j++) {
                     for (int k = 0; k < this.k; k++) {
                         for (int l = 0; l < this.l; l++) {
                             double val = votes[i][j][k][l];
-                            if (votedPairs[i][j][k][l] < 4)
+                            if (votedPairs[i][j][k][l] == null || votedPairs[i][j][k][l].size() < 4)
                                 continue;
                             boolean ok = true;
                             for (int di = -1; di <= 1 && ok; di++) {
@@ -141,10 +226,10 @@ public class ObjectDetector {
                                     for (int dk = -1; dk <= 1 && ok; dk++) {
                                         for (int dl = -1; dl <= 1 && ok; dl++) {
                                             if (di == 0 && dj == 0 && dk == 0 && dl == 0) continue;
-                                            int ni = i + di, nj = j + dj, nk = k + dk, nl = l + dl;
-                                            if (ni < 0 || nj < 0 || nk < 0 || nl < 0) continue;
-                                            if (ni >= this.n || nj >= this.m || nk >= this.k || nl >= this.l)
-                                                continue;
+                                            int ni = (i + di + this.n) % this.n;
+                                            int nj = (j + dj + this.m) % this.m;
+                                            int nk = (k + dk + this.k) % this.k;
+                                            int nl = (l + dl + this.l) % this.l;
                                             ok = val > votes[ni][nj][nk][nl];
                                         }
                                     }
@@ -159,44 +244,32 @@ public class ObjectDetector {
                                 double h = objHeight * coef;
                                 double angle = (l) * angleBin;
 //                                graphics.drawRect((int) (x - w / 2), (int) (y - h / 2), (int) w, (int) h);
-                                Pair<Double, Double>[] points = new Pair[]{
-                                        new Pair(x - w / 2, y - h / 2),
-                                        new Pair(x - w / 2, y + h / 2),
-                                        new Pair(x + w / 2, y + h / 2),
-                                        new Pair(x + w / 2, y - h / 2)
-                                };
-                                drawRectRotated(graphics, points, new Pair<>(x, y), angle);
+//                                Pair<Double, Double>[] points = new Pair[]{
+//                                        new Pair(x - w / 2, y - h / 2),
+//                                        new Pair(x - w / 2, y + h / 2),
+//                                        new Pair(x + w / 2, y + h / 2),
+//                                        new Pair(x + w / 2, y - h / 2)
+//                                };
+                                lists.add(votedPairs[i][j][k][l]);
+//                                drawRectRotated(graphics, points, new Pair<>(x, y), angle);
                             }
                         }
                     }
                 }
             }
-            graphics.dispose();
-            write(getSaveFilePath(path, "MAXS"), bufferedImage);
+//            graphics.dispose();
+//            write(getSaveFilePath(path, "MAXS"), bufferedImage);
+            return lists;
         }
 
-        private void drawRectRotated(Graphics2D graphics, Pair<Double, Double>[] points,
-                                     Pair<Double, Double> center, double angle) {
-            Pair<Double, Double>[] rotated = new Pair[points.length];
-            for (int i = 0; i < points.length; i++) {
-                rotated[i] = rotate(points[i], center, angle);
-            }
-            for (int i = 0; i < rotated.length; i++) {
-                int j = (i + 1) % rotated.length;
-                graphics.drawLine(rotated[i].getFirst().intValue(),
-                                  rotated[i].getSecond().intValue(),
-                                  rotated[j].getFirst().intValue(),
-                                  rotated[j].getSecond().intValue());
-            }
-        }
 
         private Pair<Double, Double> rotate(Pair<Double, Double> point, Pair<Double, Double> center, double angle) {
             double cos = Math.cos(angle);
             double sin = Math.sin(angle);
-            double x = point.getFirst() - center.getFirst();
-            double y = point.getSecond() - center.getSecond();
+            double x = point.getKey() - center.getKey();
+            double y = point.getValue() - center.getValue();
             double rx = x * cos - y * sin, ry = x * sin + y * cos;
-            return new Pair<>(rx + center.getFirst(), ry + center.getSecond());
+            return new Pair<>(rx + center.getKey(), ry + center.getValue());
         }
     }
 }

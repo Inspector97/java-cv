@@ -23,7 +23,7 @@ public class Lab9Algo implements Algorithm {
         Matrix imageA = Matrix.of(read(path));
         Matrix imageB = Matrix.of(read(args[0]));
 
-        Stopwatch.measure(() -> ObjectDetector.detect(path, imageB, imageA));
+        Stopwatch.measure(() -> ObjectDetector.detect(path, imageB, (path + args[0]).hashCode(), imageA));
 
 //        Matching matching = Stopwatch.measure(() -> matchBlobs(imageA, imageB, path));
 //
