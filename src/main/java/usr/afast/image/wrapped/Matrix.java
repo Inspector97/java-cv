@@ -9,6 +9,7 @@ import usr.afast.image.enums.BorderHandling;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 import java.util.function.DoubleFunction;
 
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
@@ -220,5 +221,9 @@ public class Matrix {
             }
         }
         return result;
+    }
+
+    public int hashCode() {
+        return Arrays.hashCode(buffer);
     }
 }

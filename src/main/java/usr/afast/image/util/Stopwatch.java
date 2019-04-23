@@ -21,4 +21,9 @@ public class Stopwatch {
         double time = (System.currentTimeMillis() - startTime) / 1000D;
         System.out.println(String.format("Processed in %.3f s.", time));
     }
+    public static double inSeconds(@NotNull Runnable runnable) {
+        long startTime = System.currentTimeMillis();
+        runnable.run();
+        return (System.currentTimeMillis() - startTime) / 1000D;
+    }
 }
