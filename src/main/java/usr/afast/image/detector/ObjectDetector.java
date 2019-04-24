@@ -30,18 +30,24 @@ public class ObjectDetector {
             savePath = savePath + "\\";
         Path withPath = Paths.get(savePath, "with");
         try {
+            File file = new File(String.valueOf(withPath));
+            if (file.exists()) deleteFolder(file);
             Files.createDirectory(withPath);
         } catch (IOException e) {
             //
         }
         Path withoutPath = Paths.get(savePath, "without");
         try {
+            File file = new File(String.valueOf(withoutPath));
+            if (file.exists()) deleteFolder(file);
             Files.createDirectory(withoutPath);
         } catch (IOException e) {
             //
         }
         Path matchPath = Paths.get(savePath, "matchings");
         try {
+            File file = new File(String.valueOf(matchPath));
+            if (file.exists()) deleteFolder(file);
             Files.createDirectory(matchPath);
         } catch (IOException e) {
             //
@@ -62,7 +68,10 @@ public class ObjectDetector {
                 double objectCenterX = object.getWidth() / 2D;
                 double objectCenterY = object.getHeight() / 2D;
 
-                Voting voting = new Voting(image.getWidth(), 30, image.getHeight(), 30, image.getWidth(), 30, Math.PI / 6);
+                Voting voting = new Voting(image.getWidth(), 50,
+                                           image.getHeight(), 50,
+                                           image.getWidth(), 30,
+                                           Math.PI / 6);
 
                 for (PointsPair pair : matching.getPointsPairs()) {
                     InterestingPoint atImage = pair.getPointA();
@@ -99,10 +108,11 @@ public class ObjectDetector {
                 graphics.setStroke(new BasicStroke(2));
                 int rects = 0;
                 for (List<PointsPair> match : candidates) {
+                    int before = match.size();
                     List<Pair<Point, Point>> inliners = PanoramaMaker.getInliners(image, object, match);
                     if (inliners == null) continue;
-                    if (inliners.size() < 10) continue;
-                    System.out.println(inliners.size());
+                    if (inliners.size() < 5) continue;
+                    System.out.println(before + " " + inliners.size());
                     PanoramaMaker.Perspective reversePerspective = getReversePerspective(inliners);
                     Point leftTop = Point.at(-1, -1);
                     leftTop = reversePerspective.apply(leftTop);
@@ -145,6 +155,19 @@ public class ObjectDetector {
         }
     }
 
+    public static void deleteFolder(File folder) {
+        File[] files = folder.listFiles();
+        if (files != null) { //some JVMs return null for empty dirs
+            for (File f : files) {
+                if (f.isDirectory()) {
+                    deleteFolder(f);
+                } else {
+                    f.delete();
+                }
+            }
+        }
+        folder.delete();
+    }
 
     static class Voting {
         private double[][][][] votes;
@@ -221,6 +244,7 @@ public class ObjectDetector {
                     for (int k = 0; k < this.k; k++) {
                         for (int l = 0; l < this.l; l++) {
                             double val = votes[i][j][k][l];
+                            if (val < 2) continue;
                             if (votedPairs[i][j][k][l] == null || votedPairs[i][j][k][l].size() < 4)
                                 continue;
                             boolean ok = true;
@@ -239,7 +263,7 @@ public class ObjectDetector {
                                 }
                             }
                             if (ok) {
-                                System.out.println(i + " " + j + " " + k + " " + l);
+                                System.out.println(i + " " + j + " " + k + " " + l + " " + votedPairs[i][j][k][l].size() + " " + val);
                                 double x = (i + 0.5) * widthBin, y = (j + 0.5) * heightBin;
                                 double scale = (k + 0.5) * scaleBin;
                                 double coef = scale / objWidth;

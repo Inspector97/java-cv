@@ -15,7 +15,7 @@ public class PanoramaMaker {
     private static final Random RANDOM = new Random("Captain Marsik".hashCode());
     private static List<Integer> indices;
 
-    private static final double EPS = 10;
+    private static final double EPS = 2;
 
     public static BufferedImage makePanorama(BufferedImage imageA, BufferedImage imageB, Matching matching) {
         Matrix matrixA = Matrix.of(imageA);
