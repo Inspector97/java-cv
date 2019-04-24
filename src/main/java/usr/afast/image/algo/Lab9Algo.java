@@ -7,6 +7,7 @@ import usr.afast.image.util.Stopwatch;
 import usr.afast.image.wrapped.Matrix;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
 
 import static usr.afast.image.descriptor.BlobFinder.matchBlobs;
 import static usr.afast.image.points.PointMarker.markMatching;
@@ -23,7 +24,11 @@ public class Lab9Algo implements Algorithm {
         Matrix imageA = Matrix.of(read(path));
         Matrix imageB = Matrix.of(read(args[0]));
 
-        Stopwatch.measure(() -> ObjectDetector.detect(path, imageB, (path + args[0]).hashCode(), imageA));
+        Stopwatch.measure(() -> ObjectDetector.detect(path,
+                                                      new Matrix[]{imageB},
+                                                      new Matrix[]{imageA},
+                                                      new String[]{new File(args[0]).getName()},
+                                                      new String[]{new File(path).getName()}));
 
 //        Matching matching = Stopwatch.measure(() -> matchBlobs(imageA, imageB, path));
 //

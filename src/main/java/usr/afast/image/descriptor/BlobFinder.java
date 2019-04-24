@@ -7,19 +7,18 @@ import usr.afast.image.space.scale.OctaveLayer;
 import usr.afast.image.space.scale.Pyramid;
 import usr.afast.image.wrapped.Matrix;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 import static usr.afast.image.algo.AlgoLib.getSobelX;
 import static usr.afast.image.algo.AlgoLib.getSobelY;
 import static usr.afast.image.descriptor.DescriptorUtil.match;
 import static usr.afast.image.points.Harris.getHarrisMat;
-import static usr.afast.image.util.ImageIO.getSaveFilePath;
-import static usr.afast.image.util.ImageIO.write;
+import static usr.afast.image.util.ImageIO.*;
 import static usr.afast.image.util.Math.*;
 
 public class BlobFinder {
@@ -35,15 +34,28 @@ public class BlobFinder {
     private static final double EDGE_THRESHOLD = 10;
 
     public static Matching matchBlobs(Matrix aMatrix, Matrix bMatrix, String path) {
-        List<AbstractDescriptor> abstractDescriptorsA = findBlobs(aMatrix, path);
-        List<AbstractDescriptor> abstractDescriptorsB = findBlobs(bMatrix, path);
+        int hash = Objects.hash(aMatrix.hashCode(), bMatrix.hashCode());
+        String fileName = "matching" + hash + ".bin";
+        File file = new File(fileName);
+        Matching matching;
+        if (!file.exists()) {
+            List<AbstractDescriptor> abstractDescriptorsA = findBlobs(aMatrix, path);
+            List<AbstractDescriptor> abstractDescriptorsB = findBlobs(bMatrix, path);
 
-        return match(abstractDescriptorsA, abstractDescriptorsB);
+            matching = match(abstractDescriptorsA, abstractDescriptorsB);
+            saveMatching(file, matching);
+        } else {
+            matching = readMatching(file);
+        }
+        return matching;
     }
 
     private static List<AbstractDescriptor> findBlobs(Matrix matrix, String path) {
+        String filePath = "desc" + matrix.hashCode() + ".bin";
+        File file = new File(filePath);
+        if (file.exists()) return (List<AbstractDescriptor>)read(file);
         Pyramid pyramid = Pyramid.build(matrix, INIT_SIGMA, START_SIGMA, OCTAVE_SIZE);
-//        save(pyramid, path);
+//        saveMatching(pyramid, path);
 
         List<AbstractDescriptor> descriptors = new LinkedList<>();
         double sqrt2 = Math.sqrt(2);
@@ -56,7 +68,7 @@ public class BlobFinder {
             Matrix xImage = getSobelX(startImage, BorderHandling.Mirror);
             Matrix yImage = getSobelY(startImage, BorderHandling.Mirror);
 //            ImageIO.write(getSaveFilePath("E:\\GitHub\\java-cv\\images\\cats\\temp\\layer.png", i+"" ),
-//                          Matrix.save(startImage));
+//                          Matrix.saveMatching(startImage));
 
             Matrix gradient = Matrix.getGradient(xImage, yImage);
             Matrix gradientAngle = Matrix.getGradientAngle(xImage, yImage);
@@ -68,7 +80,7 @@ public class BlobFinder {
                 int radius = (int) Math.ceil(layers.get(j).getLocalSigma() * sqrt2);
                 Matrix harris = getHarrisMat(startImage, radius);
 //                ImageIO.write(getSaveFilePath("E:\\GitHub\\java-cv\\images\\cats\\temp\\harris.png", i + "_" + j),
-//                              Matrix.save(harris));
+//                              Matrix.saveMatching(harris));
 
                 for (int x = IMAGE_BORDER; x < cur.getWidth() - IMAGE_BORDER; x++) {
                     for (int y = IMAGE_BORDER; y < cur.getHeight() - IMAGE_BORDER; y++) {
@@ -108,6 +120,7 @@ public class BlobFinder {
             }
         }
 
+        save(file, descriptors);
         return descriptors;
     }
 
@@ -217,4 +230,38 @@ public class BlobFinder {
             }
         }
     }
+
+    private static void saveMatching(File file, Matching matching) {
+        save(file, matching);
+    }
+    private static void save(File file, Object o) {
+        try {
+            FileOutputStream fout = new FileOutputStream(file);
+            ObjectOutputStream oos = new ObjectOutputStream(fout);
+            oos.writeObject(o);
+            oos.close();
+            fout.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static Matching readMatching(File file) {
+        return (Matching)read(file);
+    }
+
+    private static Object read(File file) {
+        Object o = null;
+        try {
+            FileInputStream fileInputStream = new FileInputStream(file);
+            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+            o = objectInputStream.readObject();
+            objectInputStream.close();
+            fileInputStream.close();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return o;
+    }
+
 }

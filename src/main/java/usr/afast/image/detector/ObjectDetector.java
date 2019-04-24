@@ -12,6 +12,9 @@ import usr.afast.image.wrapped.Matrix;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,127 +24,127 @@ import static usr.afast.image.points.PointMarker.markMatching;
 import static usr.afast.image.util.ImageIO.*;
 
 public class ObjectDetector {
-    public static void detect(String savePath, Matrix image, int hash, Matrix... objects) {
-        Matrix object = objects[0];
-        String fileName = hash + ".bin";
-        File file = new File(fileName);
-        Matching matching;
-        if (!file.exists()) {
-            matching = matchBlobs(image, object, savePath);
-            save(file, matching);
-        } else {
-            matching = read(file);
+    public static void detect(String savePath, Matrix[] images, Matrix[] objects, String[] imageNames,
+                              String[] objectNames) {
+        if (!savePath.endsWith("/") && !savePath.endsWith("\\"))
+            savePath = savePath + "\\";
+        Path withPath = Paths.get(savePath, "with");
+        try {
+            Files.createDirectory(withPath);
+        } catch (IOException e) {
+            //
         }
-
-        BufferedImage withBlobs = markMatching(image, object, matching);
-        write(getSaveFilePath(savePath, "MATCHING"), withBlobs);
-        System.out.println("Matching found");
-
-        double objectCenterX = object.getWidth() / 2D;
-        double objectCenterY = object.getHeight() / 2D;
-
-        Voting voting = new Voting(image.getWidth(), 30, image.getHeight(), 30, image.getWidth(), 30, Math.PI / 6);
-
-        for (PointsPair pair : matching.getPointsPairs()) {
-            InterestingPoint atImage = pair.getPointA();
-            InterestingPoint atObject = pair.getPointB();
-
-            double x = objectCenterX - atObject.getX();
-            double y = objectCenterY - atObject.getY();
-            double angle = atObject.getAngle(), cos = Math.cos(-angle), sin = Math.sin(-angle);
-
-            double rotatedX = x * cos - y * sin, rotatedY = x * sin + y * cos;
-            double scaledX = rotatedX / atObject.getScale(), scaledY = rotatedY / atObject.getScale();
-
-            double objectScale = object.getWidth() / atObject.getScale();
-
-            double resultUnscaledX = scaledX * atImage.getScale();
-            double resultUnscaledY = scaledY * atImage.getScale();
-            cos = Math.cos(atImage.getAngle());
-            sin = Math.sin(atImage.getAngle());
-            double resultX = atImage.getX() + resultUnscaledX * cos - resultUnscaledY * sin;
-            double resultY = atImage.getY() + resultUnscaledX * sin + resultUnscaledY * cos;
-
-            double votingAngle = atImage.getAngle() - atObject.getAngle();
-            double votingScale = objectScale * atImage.getScale();
-
-            voting.vote(resultX, resultY, votingScale, votingAngle, pair);
+        Path withoutPath = Paths.get(savePath, "without");
+        try {
+            Files.createDirectory(withoutPath);
+        } catch (IOException e) {
+            //
         }
-
-        List<List<PointsPair>> candidates = voting.maximums(image, savePath, object.getWidth(), object.getHeight());
-        int w1 = image.getWidth(), h1 = image.getHeight();
-        int w2 = object.getWidth(), h2 = object.getHeight();
-        BufferedImage bufferedImage = Matrix.save(image);
-        Graphics2D graphics = bufferedImage.createGraphics();
-        graphics.setColor(Color.ORANGE);
-        graphics.setStroke(new BasicStroke(2));
-        int rects = 0;
-        for (List<PointsPair> match : candidates) {
-            List<Pair<Point, Point>> inliners = PanoramaMaker.getInliners(image, object, match);
-            if (inliners == null) continue;
-            if (inliners.size() < 10) continue;
-            System.out.println(inliners.size());
-            PanoramaMaker.Perspective reversePerspective = getReversePerspective(inliners);
-            Point leftTop = Point.at(-1, -1);
-            leftTop = reversePerspective.apply(leftTop);
-            Point convertedLeftTop = Point.at(convertFrom(leftTop.getX(), w1),
-                    convertFrom(leftTop.getY(), h1));
-            Point rightTop = Point.at(1, -1);
-            rightTop = reversePerspective.apply(rightTop);
-            Point convertedRightTop = Point.at(convertFrom(rightTop.getX(), w1),
-                    convertFrom(rightTop.getY(), h1));
-            Point leftBottom = Point.at(-1, 1);
-            leftBottom = reversePerspective.apply(leftBottom);
-            Point convertedLeftBottom = Point.at(convertFrom(leftBottom.getX(), w1),
-                    convertFrom(leftBottom.getY(), h1));
-            Point rightBottom = Point.at(1, 1);
-            rightBottom = reversePerspective.apply(rightBottom);
-            Point convertedRightBottom = Point.at(convertFrom(rightBottom.getX(), w1),
-                    convertFrom(rightBottom.getY(), h1));
-            rects++;
-            drawRect(graphics, convertedLeftBottom, convertedLeftTop, convertedRightTop, convertedRightBottom);
-
+        Path matchPath = Paths.get(savePath, "matchings");
+        try {
+            Files.createDirectory(matchPath);
+        } catch (IOException e) {
+            //
         }
-        System.out.println("Drawed " + rects + " rects");
-        graphics.dispose();
-        write(getSaveFilePath(savePath, "MAXS"), bufferedImage);
+        String withDir = withPath.toString() + "\\";
+        String withoutDir = withoutPath.toString() + "\\";
+        String matchDir = matchPath.toString() + "\\";
+        for (int i = 0; i < images.length; i++) {
+            Matrix image = images[i];
+            for (int j = 0; j < objects.length; j++) {
+                Matrix object = objects[j];
+                Matching matching = matchBlobs(image, object, savePath);
+
+                BufferedImage withBlobs = markMatching(image, object, matching);
+                write(matchDir + imageNames[i] + " - " + objectNames[j] + " MATCHING.png", withBlobs);
+                System.out.println("Matching found");
+
+                double objectCenterX = object.getWidth() / 2D;
+                double objectCenterY = object.getHeight() / 2D;
+
+                Voting voting = new Voting(image.getWidth(), 30, image.getHeight(), 30, image.getWidth(), 30, Math.PI / 6);
+
+                for (PointsPair pair : matching.getPointsPairs()) {
+                    InterestingPoint atImage = pair.getPointA();
+                    InterestingPoint atObject = pair.getPointB();
+
+                    double x = objectCenterX - atObject.getX();
+                    double y = objectCenterY - atObject.getY();
+                    double angle = atObject.getAngle(), cos = Math.cos(-angle), sin = Math.sin(-angle);
+
+                    double rotatedX = x * cos - y * sin, rotatedY = x * sin + y * cos;
+                    double scaledX = rotatedX / atObject.getScale(), scaledY = rotatedY / atObject.getScale();
+
+                    double objectScale = object.getWidth() / atObject.getScale();
+
+                    double resultUnscaledX = scaledX * atImage.getScale();
+                    double resultUnscaledY = scaledY * atImage.getScale();
+                    cos = Math.cos(atImage.getAngle());
+                    sin = Math.sin(atImage.getAngle());
+                    double resultX = atImage.getX() + resultUnscaledX * cos - resultUnscaledY * sin;
+                    double resultY = atImage.getY() + resultUnscaledX * sin + resultUnscaledY * cos;
+
+                    double votingAngle = atImage.getAngle() - atObject.getAngle();
+                    double votingScale = objectScale * atImage.getScale();
+
+                    voting.vote(resultX, resultY, votingScale, votingAngle, pair);
+                }
+
+                List<List<PointsPair>> candidates = voting.maximums(image, savePath, object.getWidth(), object.getHeight());
+                int w1 = image.getWidth(), h1 = image.getHeight();
+                int w2 = object.getWidth(), h2 = object.getHeight();
+                BufferedImage bufferedImage = Matrix.save(image);
+                Graphics2D graphics = bufferedImage.createGraphics();
+                graphics.setColor(Color.ORANGE);
+                graphics.setStroke(new BasicStroke(2));
+                int rects = 0;
+                for (List<PointsPair> match : candidates) {
+                    List<Pair<Point, Point>> inliners = PanoramaMaker.getInliners(image, object, match);
+                    if (inliners == null) continue;
+                    if (inliners.size() < 10) continue;
+                    System.out.println(inliners.size());
+                    PanoramaMaker.Perspective reversePerspective = getReversePerspective(inliners);
+                    Point leftTop = Point.at(-1, -1);
+                    leftTop = reversePerspective.apply(leftTop);
+                    Point convertedLeftTop = Point.at(convertFrom(leftTop.getX(), w1),
+                                                      convertFrom(leftTop.getY(), h1));
+                    Point rightTop = Point.at(1, -1);
+                    rightTop = reversePerspective.apply(rightTop);
+                    Point convertedRightTop = Point.at(convertFrom(rightTop.getX(), w1),
+                                                       convertFrom(rightTop.getY(), h1));
+                    Point leftBottom = Point.at(-1, 1);
+                    leftBottom = reversePerspective.apply(leftBottom);
+                    Point convertedLeftBottom = Point.at(convertFrom(leftBottom.getX(), w1),
+                                                         convertFrom(leftBottom.getY(), h1));
+                    Point rightBottom = Point.at(1, 1);
+                    rightBottom = reversePerspective.apply(rightBottom);
+                    Point convertedRightBottom = Point.at(convertFrom(rightBottom.getX(), w1),
+                                                          convertFrom(rightBottom.getY(), h1));
+                    rects++;
+                    drawRect(graphics, convertedLeftBottom, convertedLeftTop, convertedRightTop, convertedRightBottom);
+
+                }
+                System.out.println("Drawed " + rects + " rects");
+                graphics.dispose();
+                if (rects == 0) {
+                    write(withoutDir + imageNames[i] + " - " + objectNames[j] + " MARKED.png", bufferedImage);
+                } else {
+                    write(withDir + imageNames[i] + " - " + objectNames[j] + " MARKED.png", bufferedImage);
+                }
+            }
+        }
     }
 
     private static void drawRect(Graphics2D graphics, Point... points) {
         for (int i = 0; i < points.length; i++) {
             int j = (i + 1) % points.length;
             graphics.drawLine((int) points[i].getX(),
-                    (int) points[i].getY(),
-                    (int) points[j].getX(),
-                    (int) points[j].getY());
+                              (int) points[i].getY(),
+                              (int) points[j].getX(),
+                              (int) points[j].getY());
         }
     }
 
-    private static void save(File file, Matching matching) {
-        try {
-            FileOutputStream fout = new FileOutputStream(file);
-            ObjectOutputStream oos = new ObjectOutputStream(fout);
-            oos.writeObject(matching);
-            oos.close();
-            fout.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static Matching read(File file) {
-        Matching matching = null;
-        try {
-            FileInputStream fileInputStream = new FileInputStream(file);
-            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
-            matching = (Matching) objectInputStream.readObject();
-            objectInputStream.close();
-            fileInputStream.close();
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        return matching;
-    }
 
     static class Voting {
         private double[][][][] votes;
@@ -183,9 +186,9 @@ public class ObjectDetector {
                             int curAngle = ((int) _angle + l) % this.l;
                             votes[curX][curY][curScale][curAngle] +=
                                     Math.abs(_x - curX) *
-                                            Math.abs(_y - curY) *
-                                            Math.abs(_scale - curScale) *
-                                            Math.abs(_angle - curAngle);
+                                    Math.abs(_y - curY) *
+                                    Math.abs(_scale - curScale) *
+                                    Math.abs(_angle - curAngle);
                             List<PointsPair> list = votedPairs[curX][curY][curScale][curAngle];
                             if (list == null) {
                                 votedPairs[curX][curY][curScale][curAngle] = list = new LinkedList<>();
